@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brasil · Gran ruta</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%97%BA%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -27,16 +28,17 @@
   img,svg{max-width:100%}
   input{font-size:16px}/* evita el zoom de iOS al enfocar */
   .wrap{max-width:760px;margin:0 auto;padding:0 20px}
-  section[id]{scroll-margin-top:66px}
+  section[id]{scroll-margin-top:calc(var(--navh,66px) + 4px)}
 
   /* ---------- NAVBAR ---------- */
   .nav{position:sticky;top:0;z-index:1000;background:var(--green-dd);border-bottom:3px solid var(--yellow);box-shadow:0 2px 12px rgba(0,0,0,.18)}
-  .nav-inner{max-width:760px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:9px 14px;min-height:52px}
-  .nav-back{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#cfeed8;text-decoration:none;padding:6px 10px;border-radius:7px;flex:none;transition:color .15s,background .15s}
+  .nav-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:7px;padding:9px 14px}
+  .nav-top{position:relative;display:flex;align-items:center;justify-content:center;width:100%;min-height:26px}
+  .nav-back{position:absolute;left:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#cfeed8;text-decoration:none;padding:6px 10px;border-radius:7px;transition:color .15s,background .15s}
   .nav-back:hover{color:#fff;background:rgba(255,255,255,.10)}
-  .nav-brand{display:flex;align-items:center;gap:8px;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:#fff;white-space:nowrap;flex:none}
+  .nav-brand{display:flex;align-items:center;gap:8px;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:#fff;white-space:nowrap}
   .nav-brand .flag{width:24px;height:15px;border-radius:2px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.25)}
-  .nav-links{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto;justify-content:center}
+  .nav-links{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
   .nav-links::-webkit-scrollbar{display:none}
   .nav-links a{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#cfeed8;text-decoration:none;padding:7px 11px;border-radius:7px;white-space:nowrap;transition:color .15s,background .15s}
   .nav-links a:hover{color:#fff;background:rgba(255,255,255,.08)}
@@ -144,7 +146,7 @@
   @media(prefers-reduced-motion:reduce){.tabpanel{animation:none}}
   /* flechas de las tabs */
   .tabsrow{display:flex;align-items:center;gap:4px}
-  .tabsrow.sticky{position:sticky;top:52px;z-index:40;background:var(--paper)}
+  .tabsrow.sticky{position:sticky;top:var(--navh,52px);z-index:40;background:var(--paper)}
   .tabsrow .tabs{flex:1 1 auto;min-width:0}
   .tabs-arrow{flex:none;width:30px;height:34px;border:1px solid var(--line);background:#fff;border-radius:8px;color:var(--green-d);font-size:18px;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
   .tabs-arrow:hover{background:#e6f6ec;border-color:var(--green)}
@@ -224,11 +226,13 @@
 <!-- NAVBAR -->
 <nav class="nav">
   <div class="nav-inner">
-    <a class="nav-back" href="../index.html">← Viajes</a>
-    <span class="nav-brand">
-      <svg class="flag" viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="10" fill="#009739"/><polygon points="8,1 15,5 8,9 1,5" fill="#fedd00"/><circle cx="8" cy="5" r="2.1" fill="#012169"/></svg>
-      Brasil
-    </span>
+    <div class="nav-top">
+      <a class="nav-back" href="../index.html">← Viajes</a>
+      <span class="nav-brand">
+        <svg class="flag" viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="10" fill="#009739"/><polygon points="8,1 15,5 8,9 1,5" fill="#fedd00"/><circle cx="8" cy="5" r="2.1" fill="#012169"/></svg>
+        Brasil
+      </span>
+    </div>
     <div class="nav-links">
       <a href="#cambio">Cambio</a>
       <a href="#tiempo">Tiempo</a>
@@ -244,7 +248,6 @@
 
 <!-- HERO -->
 <header>
-  <div class="sun" aria-hidden="true"></div>
   <div class="wrap">
     <svg class="hero-flag" viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="10" fill="#009739"/><polygon points="8,1 15,5 8,9 1,5" fill="#fedd00"/><circle cx="8" cy="5" r="2.1" fill="#012169"/></svg>
     <div class="eyebrow">27 ago — 12 sep · 2026</div>
@@ -824,6 +827,13 @@
       });
     },{rootMargin:'-55px 0px -70% 0px'});
     secs.forEach(function(s){spy.observe(s);});
+  })();
+
+  /* ===== altura real de la navbar (para sticky y anclas) ===== */
+  (function(){
+    var nav=document.querySelector('.nav');if(!nav)return;
+    function setH(){document.documentElement.style.setProperty('--navh',nav.offsetHeight+'px');}
+    setH();window.addEventListener('resize',setH);window.addEventListener('load',setH);
   })();
 
   /* ===== flechas de desplazamiento en las tabs ===== */
