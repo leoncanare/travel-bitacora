@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brasil · Gran ruta</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%97%BA%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root{
+    --green:#009739;      /* verde bandera Brasil */
+    --green-d:#00722b;
+    --green-dd:#00531f;
+    --yellow:#fedd00;    /* amarillo bandera Brasil */
+    --gold-deep:#8a7400; /* version legible para texto */
+    --blue:#012169;      /* azul del globo */
+    --paper:#eef4ec;--card:#f9fbf7;
+    --ink:#14261a;--muted:#5a6b5e;--line:#d7ddce;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  html,body{overflow-x:clip;max-width:100%}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;text-size-adjust:100%;-webkit-text-size-adjust:100%}
+  img,svg{max-width:100%}
+  input{font-size:16px}/* evita el zoom de iOS al enfocar */
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+  section[id]{scroll-margin-top:calc(var(--navh,66px) + 4px)}
+
+  /* ---------- NAVBAR ---------- */
+  .nav{position:sticky;top:0;z-index:1000;background:var(--green-dd);border-bottom:3px solid var(--yellow);box-shadow:0 2px 12px rgba(0,0,0,.18)}
+  .nav-inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:7px;padding:9px 14px}
+  .nav-top{position:relative;display:flex;align-items:center;justify-content:center;width:100%;min-height:26px}
+  .nav-back{position:absolute;left:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#cfeed8;text-decoration:none;padding:6px 10px;border-radius:7px;transition:color .15s,background .15s}
+  .nav-back:hover{color:#fff;background:rgba(255,255,255,.10)}
+  .nav-brand{display:flex;align-items:center;gap:8px;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:#fff;white-space:nowrap}
+  .nav-brand .flag{width:24px;height:15px;border-radius:2px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+  .nav-links{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#cfeed8;text-decoration:none;padding:7px 11px;border-radius:7px;white-space:nowrap;transition:color .15s,background .15s}
+  .nav-links a:hover{color:#fff;background:rgba(255,255,255,.08)}
+  .nav-links a.active{color:var(--green-dd);background:var(--yellow)}
+
+  /* ---------- HERO ---------- */
+  header{position:relative;overflow:hidden;padding:48px 0 40px;color:#eef8f0;
+    background:linear-gradient(165deg,var(--green) 0%, var(--green-d) 55%, var(--green-dd) 100%)}
+  /* rombo de fondo */
+  header::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(45deg);z-index:0;opacity:.10;
+    width:300px;height:300px;background:var(--yellow)}
+  header .wrap{position:relative;z-index:2}
+  .sun{position:absolute;top:-90px;right:-50px;width:240px;height:240px;border-radius:50%;z-index:1;
+    background:radial-gradient(circle,var(--yellow) 0%, rgba(254,221,0,.30) 45%, transparent 70%);filter:blur(2px)}
+  .hero-flag{width:58px;height:36px;border-radius:4px;box-shadow:0 4px 14px rgba(0,0,0,.3);margin-bottom:18px;display:block}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--yellow);margin-bottom:12px}
+  h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(46px,12vw,86px);line-height:.92;letter-spacing:-.02em;color:#fff}
+  h1 span{display:block;color:var(--yellow)}
+  .sub{margin-top:18px;max-width:46ch;color:#d4f0dd;font-size:16px}
+  .meta{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px}
+  .chip{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.2);padding:7px 12px;border-radius:999px;color:#eef8f0}
+  .chip b{color:var(--yellow)}
+
+  /* ---------- SECTIONS ---------- */
+  .sec{padding:38px 0 4px}
+  .sec-h{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--green-d);display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .sec-h .dot{width:10px;height:10px;border-radius:50%;background:var(--yellow);flex:none;box-shadow:0 0 0 3px rgba(0,151,57,.18)}
+  .sec-h::after{content:"";flex:1;height:2px;background:linear-gradient(to right,var(--green) 0 26px,var(--line) 26px)}
+
+  .day{margin-bottom:30px}
+  .day-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+  .day-tag{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--yellow);background:var(--green-d);padding:4px 10px;border-radius:6px;letter-spacing:.04em}
+  .day-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:20px}
+  .day-sub{color:var(--muted);font-size:14px;margin:2px 0 16px}
+  .day-box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px 6px;margin-bottom:14px}
+  .day-box-head{margin-bottom:8px}
+  .day-box-head .dtag{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--yellow);background:var(--green-d);padding:4px 10px;border-radius:6px;letter-spacing:.04em}
+  .day-box .track{margin-top:2px}
+  .day-box .stop:last-child{padding-bottom:2px}
+
+  .track{position:relative;padding-left:26px}
+  .track::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--yellow),var(--line))}
+  .stop{position:relative;padding:0 0 18px}
+  .stop::before{content:"";position:absolute;left:-26px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--card);border:3px solid var(--yellow)}
+  .stop.free::before{border-color:var(--green)}
+  .stop.star::before{border-color:var(--blue);background:var(--blue)}
+  .time{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--gold-deep);margin-bottom:1px}
+  .stop h4{font-size:15.5px;font-weight:600}
+  .stop p{font-size:14px;color:var(--muted);margin-top:2px}
+  .price{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11.5px;background:#fbf3cf;color:var(--gold-deep);padding:1px 7px;border-radius:5px;margin-left:4px}
+  .free-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11.5px;background:#d8efdf;color:var(--green-d);padding:1px 7px;border-radius:5px;margin-left:4px}
+  .opt-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11.5px;background:#e6e2f2;color:var(--blue);padding:1px 7px;border-radius:5px;margin-left:4px}
+  .go{display:inline-flex;align-items:center;gap:4px;margin:7px 6px 0 0;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--green-d);text-decoration:none;border:1px solid #c7e0cf;background:#fff;padding:5px 11px;border-radius:999px;transition:background .15s,border-color .15s}
+  .go:hover{background:#e6f6ec;border-color:var(--green)}
+  .go.book{color:var(--blue);border-color:#c3c9e0}
+  .go.book:hover{background:#eef0f9;border-color:var(--blue)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
+  .card.feature{border-top:4px solid var(--yellow)}
+  .card h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:17px;margin-bottom:12px}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+  .row:last-child{border-bottom:0}
+  .row b{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gold-deep);white-space:nowrap;text-align:right}
+  .row b small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+  .row span{color:var(--ink)}
+  .row span small{display:block;color:var(--muted);font-size:12.5px}
+  .row .golink{display:inline-block;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--green-d);text-decoration:none}
+  .row .golink:hover{text-decoration:underline}
+
+  ul.tips{list-style:none}
+  ul.tips li{position:relative;padding:8px 0 8px 24px;font-size:14px;border-bottom:1px dashed var(--line)}
+  ul.tips li:last-child{border-bottom:0}
+  ul.tips li::before{content:"›";position:absolute;left:4px;top:7px;color:var(--gold-deep);font-weight:800}
+  ul.tips b{color:var(--ink)}
+
+  /* ---------- MAPA ---------- */
+  #map{height:440px;border-radius:14px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(20,38,26,.06);z-index:1}
+  @media(max-width:560px){#map{height:360px}}
+  .map-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:14px}
+  .map-legend .lg{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--ink)}
+  .map-legend .pin{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+  .map-note{font-size:12.5px;color:var(--muted);margin-top:12px}
+  .leaflet-popup-content{font-family:'Inter',system-ui,sans-serif;font-size:13px;margin:12px 14px}
+  .leaflet-popup-content b{font-family:'Bricolage Grotesque',sans-serif}
+  .leaflet-popup-content .pop-info{color:var(--muted);display:block;margin:4px 0 8px}
+  .leaflet-popup-content a{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--green-d);text-decoration:none}
+
+  /* ---------- TABS ---------- */
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin-bottom:8px;background:var(--paper);-webkit-overflow-scrolling:touch}
+  .tabs.sticky{position:sticky;top:52px;z-index:40}
+  .wxbig{display:flex;align-items:center;gap:16px;margin-bottom:10px}
+  .wxbig .ic{font-size:46px;line-height:1;flex:none}
+  .wxbig .t{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;color:var(--ink)}
+  .wxbig .s{font-size:13.5px;color:var(--muted)}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:var(--green-d);background:#fff;border:1px solid var(--line);padding:8px 13px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+  .tab:hover{background:#e6f6ec;border-color:var(--green)}
+  .tab.active{color:#fff;background:var(--green);border-color:var(--green)}
+  .tab small{display:block;font-weight:500;font-size:10px;color:inherit;opacity:.85;letter-spacing:.02em}
+  .tabpanel{display:none;animation:fade .35s ease}
+  .tabpanel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.tabpanel{animation:none}}
+  /* flechas de las tabs */
+  .tabsrow{display:flex;align-items:center;gap:4px}
+  .tabsrow.sticky{position:sticky;top:var(--navh,52px);z-index:40;background:var(--paper)}
+  .tabsrow .tabs{flex:1 1 auto;min-width:0}
+  .tabs-arrow{flex:none;width:30px;height:34px;border:1px solid var(--line);background:#fff;border-radius:8px;color:var(--green-d);font-size:18px;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .tabs-arrow:hover{background:#e6f6ec;border-color:var(--green)}
+  /* controles de cada parada: visto + reordenar */
+  .stop.has-tools{padding-right:88px}
+  .stop-tools{position:absolute;right:0;top:0;display:flex;align-items:center;gap:4px;z-index:2}
+  .stop-tools button{width:24px;height:24px;border:1px solid var(--line);background:#fff;border-radius:6px;color:var(--green-d);font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+  .stop-tools button:hover{background:#e6f6ec;border-color:var(--green)}
+  .stop-tools .chk{color:transparent;font-size:13px}
+  .stop.done .stop-tools .chk{background:var(--green);border-color:var(--green);color:#fff}
+  .stop.done h4{text-decoration:line-through;opacity:.6}
+  .stop.done p{opacity:.55}
+
+  /* alojamiento */
+  .stay{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--green);border-radius:12px;padding:15px 17px;margin-bottom:22px}
+  .stay .st-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px}
+  .stay .st-dates{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:#fff;background:var(--green-d);padding:2px 8px;border-radius:5px}
+  .stay .st-addr{font-size:13.5px;color:var(--muted);margin-bottom:9px}
+  .stay .st-links{display:flex;flex-wrap:wrap;gap:7px}
+
+  /* currency */
+  .cur-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.cur-grid{grid-template-columns:1fr}}
+  .conv .rate-line{font-size:14px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .conv .rate-line input{width:66px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:var(--gold-deep);border:1px solid var(--line);border-radius:6px;padding:4px 6px;text-align:center;background:#fff}
+  .conv-field{display:flex;align-items:center;gap:10px;margin:10px 0}
+  .conv-field label{width:70px;font-size:13px;color:var(--muted)}
+  .conv-field input{flex:1 1 auto;width:100%;min-width:0;max-width:100%;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:20px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
+  .conv-field input:focus{outline:2px solid var(--yellow)}
+  .conv-field .u{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gold-deep);width:42px}
+  .conv-swap{text-align:center;color:var(--green);font-size:18px;margin:2px 0}
+  .cur-note{font-size:12px;color:var(--muted);margin-top:10px}
+
+  /* weather */
+  .wx{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  @media(max-width:560px){.wx{grid-template-columns:repeat(3,1fr)}}
+  .wx-day{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 8px;text-align:center;min-width:0}
+  .wx-day .d{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--green-d)}
+  .wx-day .ic{font-size:26px;margin:6px 0;line-height:1}
+  .wx-day .t{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;color:var(--ink)}
+  .wx-day .r{font-size:11px;color:var(--muted);margin-top:2px}
+  .wx-note{font-size:12.5px;color:var(--muted);margin-top:14px}
+
+  footer{margin-top:46px;padding:28px 0 50px;border-top:3px solid var(--yellow);text-align:center;color:var(--muted);font-size:13px}
+  footer b{color:var(--gold-deep)}
+  footer .ffl{width:30px;height:19px;border-radius:3px;margin:0 auto 12px;display:block}
+
+  /* ---------- AJUSTES MOVIL ---------- */
+  @media(max-width:480px){
+    .wrap{padding:0 16px}
+    .nav-inner{gap:8px 10px;padding:9px 12px;min-height:50px}
+    .nav-brand{font-size:14px}
+    .nav-links{width:100%;margin-left:0;justify-content:center}
+    .nav-links a{font-size:12px;padding:7px 10px}
+    header{padding:34px 0 30px}
+    .hero-flag{width:50px;height:31px;margin-bottom:14px}
+    h1{font-size:clamp(40px,15vw,60px)}
+    .sub{font-size:15px}
+    .day-head{gap:10px}
+    .day-title{font-size:18px}
+    .day-tag{font-size:12px}
+    .stop h4{font-size:15px}
+    .card{padding:16px 16px}
+    .golink{padding:3px 0}
+    .wx-day .t{font-size:19px}
+    .conv-field input{font-size:18px}
+    .conv-field label{width:62px}
+  }
+
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-top">
+      <a class="nav-back" href="../index.html">← Viajes</a>
+      <span class="nav-brand">
+        <svg class="flag" viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="10" fill="#009739"/><polygon points="8,1 15,5 8,9 1,5" fill="#fedd00"/><circle cx="8" cy="5" r="2.1" fill="#012169"/></svg>
+        Brasil
+      </span>
+    </div>
+    <div class="nav-links">
+      <a href="#cambio">Cambio</a>
+      <a href="#tiempo">Tiempo</a>
+      <a href="#plan">Ruta</a>
+      <a href="#mapa">Mapa</a>
+      <a href="#comer">Comer</a>
+      <a href="#esenciales">Esenciales</a>
+      <a href="#consejos">Consejos</a>
+      <a href="#portugues">Portugués</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header>
+  <div class="wrap">
+    <svg class="hero-flag" viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="10" fill="#009739"/><polygon points="8,1 15,5 8,9 1,5" fill="#fedd00"/><circle cx="8" cy="5" r="2.1" fill="#012169"/></svg>
+    <div class="eyebrow">27 ago — 12 sep · 2026</div>
+    <h1>Brasil<span>gran ruta</span></h1>
+    <p class="sub">Diecisiete días entre boda, cataratas y playas: São Paulo, las cataratas de Iguazú, Río de Janeiro y la Costa Verde (Angra dos Reis y Paraty). Ordem e progresso.</p>
+    <div class="meta">
+      <span class="chip">🗺️ <b>6 etapas</b></span>
+      <span class="chip">📅 <b>17 días</b></span>
+      <span class="chip">💒 Boda 30 ago</span>
+      <span class="chip">💱 1€ ≈ <b>6,2 R$</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- CAMBIO DE MONEDA -->
+  <section class="sec" id="cambio">
+    <div class="sec-h"><span class="dot"></span>Cambio de moneda</div>
+    <div class="cur-grid">
+      <div class="card feature reveal">
+        <h3>Calculadora</h3>
+        <div class="conv">
+          <div class="rate-line">Tipo de cambio: 1 € = <input id="rate" type="number" value="6.2" step="0.1" min="1" inputmode="decimal"> R$</div>
+          <div class="conv-field"><label>Euros</label><input id="eur" type="number" placeholder="0" inputmode="decimal"><span class="u">€</span></div>
+          <div class="conv-swap" aria-hidden="true">⇅</div>
+          <div class="conv-field"><label>Reales</label><input id="brl" type="number" placeholder="0" inputmode="decimal"><span class="u">R$</span></div>
+          <p class="cur-note">Escribe en cualquiera de los dos campos. El tipo es aproximado; ajústalo si cambia.</p>
+        </div>
+      </div>
+      <div class="card reveal">
+        <h3>De un vistazo</h3>
+        <div class="row"><span>1 €</span><b>6,2 R$</b></div>
+        <div class="row"><span>5 €</span><b>31 R$</b></div>
+        <div class="row"><span>10 €</span><b>62 R$</b></div>
+        <div class="row"><span>20 €</span><b>124 R$</b></div>
+        <div class="row"><span>50 €</span><b>310 R$</b></div>
+        <div class="row"><span>50 R$</span><b>~8 €</b></div>
+        <div class="row"><span>100 R$</span><b>~16 €</b></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIEMPO -->
+  <section class="sec" id="tiempo">
+    <div class="sec-h"><span class="dot"></span>El tiempo por ubicación</div>
+    <div class="tabgroup reveal">
+      <div class="tabs" role="tablist" aria-label="Tiempo por ubicación">
+        <button class="tab active" role="tab" data-tab="wx-sp">🇧🇷 São Paulo</button>
+        <button class="tab" role="tab" data-tab="wx-foz">💦 Foz do Iguaçu</button>
+        <button class="tab" role="tab" data-tab="wx-rio">⛰️ Río de Janeiro</button>
+        <button class="tab" role="tab" data-tab="wx-angra">⛵ Angra dos Reis</button>
+        <button class="tab" role="tab" data-tab="wx-paraty">🏖️ Paraty</button>
+      </div>
+      <div class="tabpanel active" id="tab-wx-sp" role="tabpanel">
+        <div class="card">
+          <div class="wxwrap" data-lat="-23.5505" data-lon="-46.6333" data-start="2026-08-27" data-end="2026-08-31">
+            <div class="wxbig"><span class="ic">🌦️</span><div><div class="t">22° / 12°</div><div class="s">Fin del invierno · cielos variables · lluvia ocasional</div></div></div>
+          </div>
+          <p class="wx-note">27–31 ago (la vuelta 11–12 sep también es São Paulo). Fresco de noche (12–14°): lleva <b>chaqueta o abrigo ligero</b>, sobre todo para la boda. Un paraguas plegable no sobra.</p>
+          <p class="wx-note wx-live">Estimación; se sustituye por el pronóstico en vivo al abrir la página con conexión.</p>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-wx-foz" role="tabpanel">
+        <div class="card">
+          <div class="wxwrap" data-lat="-25.5163" data-lon="-54.5854" data-start="2026-08-31" data-end="2026-09-03">
+            <div class="wxbig"><span class="ic">🌤️</span><div><div class="t">26° / 15°</div><div class="s">Subtropical · húmedo y más cálido</div></div></div>
+          </div>
+          <p class="wx-note">31 ago–3 sep. Agradable de día, con humedad. En las cataratas te mojas igual: <b>chubasquero</b> y funda para el móvil. Los chubascos pasan rápido.</p>
+          <p class="wx-note wx-live">Estimación; se sustituye por el pronóstico en vivo al abrir la página con conexión.</p>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-wx-rio" role="tabpanel">
+        <div class="card">
+          <div class="wxwrap" data-lat="-22.9068" data-lon="-43.1729" data-start="2026-09-03" data-end="2026-09-07">
+            <div class="wxbig"><span class="ic">☀️</span><div><div class="t">28° / 20°</div><div class="s">Soleado y seco · la mejor época del viaje</div></div></div>
+          </div>
+          <p class="wx-note">3–7 sep. Sol y calorcito, ideal para playa. <b>Protección solar obligatoria</b> aunque esté nublado, y bebe mucha agua. Alguna tarde puede entrar bruma.</p>
+          <p class="wx-note wx-live">Estimación; se sustituye por el pronóstico en vivo al abrir la página con conexión.</p>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-wx-angra" role="tabpanel">
+        <div class="card">
+          <div class="wxwrap" data-lat="-23.0069" data-lon="-44.3181" data-start="2026-09-07" data-end="2026-09-10">
+            <div class="wxbig"><span class="ic">⛅</span><div><div class="t">27° / 19°</div><div class="s">Cálido y húmedo · mar templado</div></div></div>
+          </div>
+          <p class="wx-note">7–10 sep. Calor con humedad y algún chubasco tropical que se va rápido. El mar está agradable para bañarse y bucear. <b>Protección solar resistente al agua</b> y repelente.</p>
+          <p class="wx-note wx-live">Estimación; se sustituye por el pronóstico en vivo al abrir la página con conexión.</p>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-wx-paraty" role="tabpanel">
+        <div class="card">
+          <div class="wxwrap" data-lat="-23.2178" data-lon="-44.7131" data-start="2026-09-10" data-end="2026-09-11">
+            <div class="wxbig"><span class="ic">🌦️</span><div><div class="t">26° / 19°</div><div class="s">Húmedo · calor tropical entre mar y selva</div></div></div>
+          </div>
+          <p class="wx-note">10–11 sep. Bochorno y posibles chubascos cortos típicos de la Mata Atlántica. Ideal para el tobogán y el paseo en barco. <b>Repelente</b>, protección solar y algo para la lluvia.</p>
+          <p class="wx-note wx-live">Estimación; se sustituye por el pronóstico en vivo al abrir la página con conexión.</p>
+        </div>
+      </div>
+    </div>
+    <p class="wx-note">Máximas/mínimas típicas de finales de agosto–septiembre (fin del invierno / inicio de la primavera austral). Son orientativas: consulta la previsión concreta unos días antes de cada etapa.</p>
+  </section>
+
+  <!-- ITINERARIO CON TABS -->
+  <section class="sec" id="plan">
+    <div class="sec-h"><span class="dot"></span>La ruta, etapa a etapa</div>
+
+    <div class="tabgroup">
+    <div class="tabs sticky" role="tablist" aria-label="Etapas del viaje">
+      <button class="tab active" role="tab" data-tab="sp1">🇧🇷 São Paulo<small>27–31 ago</small></button>
+      <button class="tab" role="tab" data-tab="foz">💦 Foz do Iguaçu<small>31 ago–3 sep</small></button>
+      <button class="tab" role="tab" data-tab="rio">⛰️ Río de Janeiro<small>3–7 sep</small></button>
+      <button class="tab" role="tab" data-tab="angra">⛵ Angra dos Reis<small>7–10 sep</small></button>
+      <button class="tab" role="tab" data-tab="paraty">🏖️ Paraty<small>10–11 sep</small></button>
+      <button class="tab" role="tab" data-tab="sp2">✈️ São Paulo<small>11–12 sep</small></button>
+    </div>
+
+    <!-- === SÃO PAULO (IDA) === -->
+    <div class="tabpanel active" id="tab-sp1" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏠 Airbnb en São Paulo <span class="st-dates">27–31 ago</span></div>
+        <div class="st-addr">Rua Camberra, 352 · 03357-010 · São Paulo. Entrada 27 a las 14:00 · salida 31 a las 11:00.</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Camberra+352+São+Paulo+03357-010">📍 Ubicación ↗</a>
+          <a class="go book" target="_blank" rel="noopener" href="https://www.airbnb.es/rooms/888417364681663256">🛏️ Airbnb ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <div class="days">
+          <div class="day-box" data-day="JUE 27 AGO">
+            <div class="day-box-head"><span class="dtag">JUE 27 AGO</span></div>
+            <div class="track">
+              <div class="stop"><div class="time">Llegada 05:55</div><h4>Modistas</h4><p>Nada más aterrizar, cita con las modistas para los arreglos de la ropa de la boda. Después, descanso y primera toma de contacto con la ciudad.</p></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="VIE 28 AGO">
+            <div class="day-box-head"><span class="dtag">VIE 28 AGO</span></div>
+            <div class="track">
+              <div class="stop free"><h4>Free Tour por el centro<span class="free-tag">gratis</span></h4><p>La mejor forma de ubicarse: centro histórico, Catedral da Sé, Pátio do Colégio y el Theatro Municipal. Deja propina al guía.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Praça+da+Sé+São+Paulo">📍 Punto de inicio ↗</a></div>
+              <div class="stop"><h4>Mirador Farol Santander<span class="price">~R$25 · ~4€</span></h4><p>La torre-mirador (antigua Torre Santander) con vistas 360° de la megaciudad desde el piso 26. Ideal al atardecer.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Farol+Santander+São+Paulo">📍 Ubicación ↗</a></div>
+              <div class="stop star"><div class="time">18:00</div><h4>🎉 Despedida de solteros · Vila Madalena</h4><p>Noche de despedida en Rua Harmonia 77 (Vila Madalena, el barrio bohemio de bares). Organiza los traslados de vuelta (Uber/99).</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Harmonia+77+Vila+Madalena+São+Paulo+05435-000">📍 Ubicación ↗</a></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="SÁB 29 AGO">
+            <div class="day-box-head"><span class="dtag">SÁB 29 AGO</span></div>
+            <div class="track">
+              <div class="stop"><h4>Avenida Paulista</h4><p>La arteria de la ciudad: el MASP y su colección colgada en cristal. Los domingos es peatonal, pero en sábado también se vive.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Avenida+Paulista+MASP+São+Paulo">📍 Ubicación ↗</a></div>
+              <div class="stop"><h4>Mercado Municipal (Mercadão)</h4><p>Prueba el mítico <i>sanduíche de mortadela</i> y el pastel de bacalao bajo las vidrieras. Mercado de frutas exóticas para picar.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Mercado+Municipal+de+São+Paulo">📍 Ubicación ↗</a></div>
+              <div class="stop"><h4>Barrio Japonés · Liberdade</h4><p>El mayor barrio japonés fuera de Japón: farolillos, tiendas asiáticas y ramen. Los findes hay feria callejera.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Liberdade+São+Paulo">📍 Ubicación ↗</a></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="DOM 30 AGO">
+            <div class="day-box-head"><span class="dtag">DOM 30 AGO</span></div>
+            <div class="track">
+              <div class="stop star"><h4>💒 Boda · Sítio Barrocada</h4><p>El gran día. Celebración en Av. Cel. Sezefredo Fagundes 6123 (Sítio Barrocada, al norte de la ciudad). Todo el día reservado.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Av.+Cel.+Sezefredo+Fagundes+6123+Sítio+Barrocada+São+Paulo">📍 Ubicación ↗</a></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="LUN 31 AGO">
+            <div class="day-box-head"><span class="dtag">LUN 31 AGO</span></div>
+            <div class="track">
+              <div class="stop"><div class="time">11:00 · vuelo 12:05</div><h4>Checkout y salida al aeropuerto ✈️</h4><p>Deja el Airbnb a las 11:00 y al aeropuerto: vuelo a Foz do Iguaçu a las 12:05. Ve con margen.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === FOZ DO IGUAÇU === -->
+    <div class="tabpanel" id="tab-foz" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏨 Hotel en Foz do Iguaçu <span class="st-dates">31 ago–3 sep</span></div>
+        <div class="st-addr">Rua Marechal Deodoro, 984 · Centro · Foz do Iguaçu · CEP 85851-030. 3 noches + desayuno (6 pax · 597€).</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Marechal+Deodoro+984+Centro+Foz+do+Iguaçu+85851-030">📍 Ubicación ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <div class="days">
+          <div class="day-box" data-day="LUN 31 AGO">
+            <div class="day-box-head"><span class="dtag">LUN 31 AGO</span></div>
+            <div class="track">
+              <div class="stop"><div class="time">Vuelo 12:05 → 13:55</div><h4>Vuelo São Paulo → Foz do Iguaçu</h4><p>Llegada y traslado al hotel (~20:00 instalados). Tarde tranquila; muchos hoteles tienen piscina para el calor.</p></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="MAR 1 SEP">
+            <div class="day-box-head"><span class="dtag">MAR 1 SEP</span></div>
+            <div class="track">
+              <div class="stop"><div class="time">Lado argentino</div><h4>Cataratas de Iguazú (Argentina)<span class="price">tour + entrada</span></h4><p>El día grande: <b>Circuito Inferior</b>, <b>Circuito Superior</b> y el trenecito hasta la <b>Garganta del Diablo</b>. Cruzas frontera: <b>lleva pasaporte</b>. Llévate chubasquero.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Garganta+del+Diablo+Cataratas+del+Iguazú+Argentina">📍 Ubicación ↗</a> <a class="go book" target="_blank" rel="noopener" href="https://www.civitatis.com/es/puerto-iguazu/excursion-cataratas-iguazu/">🎫 Tour Civitatis ↗</a></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="MIÉ 2 SEP">
+            <div class="day-box-head"><span class="dtag">MIÉ 2 SEP</span></div>
+            <div class="track">
+              <div class="stop"><div class="time">Lado brasileño</div><h4>Rafting · Macuco Safari<span class="price">reservar el día 1</span></h4><p>Aventura en el río Iguaçu por debajo de las cataratas. Confírmalo el primer día del tour. Emociones fuertes garantizadas.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Macuco+Safari+Foz+do+Iguaçu">📍 Ubicación ↗</a> <a class="go book" target="_blank" rel="noopener" href="https://ingressos.macucosafari.com.br/">🎫 Entradas ↗</a></div>
+              <div class="stop"><h4>Trilha das Cataratas + Garganta del Diablo (pasarela)</h4><p>La panorámica completa desde Brasil: sendero entre saltos y la pasarela que te mete dentro de la Garganta. Remata con el <b>Elevador Panorámico</b>.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Trilha+das+Cataratas+Parque+Nacional+do+Iguaçu">📍 Ubicación ↗</a></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="JUE 3 SEP">
+            <div class="day-box-head"><span class="dtag">JUE 3 SEP</span></div>
+            <div class="track">
+              <div class="stop"><div class="time">Vuelo 10:15 → 12:15</div><h4>Checkout y vuelo a Río 🛫</h4><p>Salida temprana. Vuelo Foz do Iguaçu → Río de Janeiro (GIG), llegada 12:15.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === RÍO DE JANEIRO === -->
+    <div class="tabpanel" id="tab-rio" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏠 Airbnb en Río de Janeiro <span class="st-dates">3–7 sep</span></div>
+        <div class="st-addr">R. Duvivier, 64 · Copacabana · 22020-020 · a un paso de la playa. Apartamento · 2 dormitorios · 3 baños. Recogida del coche el día 7 (~11:30) en Botafogo.</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=R.+Duvivier+64+Copacabana+Rio+de+Janeiro+22020-020">📍 Ubicación ↗</a>
+          <a class="go book" target="_blank" rel="noopener" href="https://www.airbnb.es/rooms/1605040176128811220">🛏️ Airbnb ↗</a>
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Casa+e+Gourmet+Rua+General+Severiano+97+Botafogo+Rio+de+Janeiro">🚗 Recogida coche ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <div class="days">
+          <div class="day-box" data-day="JUE 3 SEP">
+            <div class="day-box-head"><span class="dtag">JUE 3 SEP</span></div>
+            <div class="track">
+              <div class="stop free"><h4>Aterrizar y playa<span class="free-tag">relax</span></h4><p>Comer, primera vuelta por las playas, duchita y salir por la zona. Día de aclimatación al ritmo carioca.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Praia+de+Copacabana+Rio+de+Janeiro">📍 Copacabana ↗</a></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="VIE 4 SEP">
+            <div class="day-box-head"><span class="dtag">VIE 4 SEP</span></div>
+            <div class="track">
+              <div class="stop"><h4>Cristo Redentor · Corcovado<span class="price">~R$115 · ~19€</span></h4><p>La postal de Brasil sobre el cerro del Corcovado. Reserva online y ve temprano para esquivar nubes y colas.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Cristo+Redentor+Corcovado">📍 Ubicación ↗</a></div>
+              <div class="stop free"><h4>Escadaria Selarón<span class="free-tag">gratis</span></h4><p>Las escaleras de azulejos de colores del artista Selarón, entre Lapa y Santa Teresa. Foto obligada.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Escadaria+Selarón+Rio+de+Janeiro">📍 Ubicación ↗</a></div>
+              <div class="stop star"><div class="time">Noche</div><h4>Fluminense vs Vasco da Gama <span class="opt-tag">o helicóptero</span></h4><p>Derbi carioca en el Maracanã, ambientazo asegurado. <b>Alternativa:</b> vuelo panorámico en helicóptero sobre el Cristo y la bahía.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Estádio+do+Maracanã+Rio+de+Janeiro">📍 Maracanã ↗</a></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="SÁB 5 SEP">
+            <div class="day-box-head"><span class="dtag">SÁB 5 SEP</span></div>
+            <div class="track">
+              <div class="stop"><h4>Favela Santa Marta</h4><p>Favela pacificada y segura con tour guiado (la del videoclip de Michael Jackson). Vistas y mirador con la estatua. Ve siempre con guía local.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Favela+Santa+Marta+Rio+de+Janeiro">📍 Ubicación ↗</a></div>
+              <div class="stop"><h4>Jardín Botánico<span class="price">~R$70 · ~11€</span></h4><p>Palmeras imperiales gigantes, orquídeas y bromelias. Oasis verde a los pies del Corcovado.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Jardim+Botânico+Rio+de+Janeiro">📍 Ubicación ↗</a></div>
+              <div class="stop"><div class="time">Atardecer</div><h4>Pão de Açúcar (Pan de Azúcar)<span class="price">~R$150 · ~24€</span></h4><p>Teleférico en dos tramos con las mejores vistas de la bahía. Reserva el atardecer para la mejor luz.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Bondinho+Pão+de+Açúcar+Rio">📍 Ubicación ↗</a></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="DOM 6 SEP">
+            <div class="day-box-head"><span class="dtag">DOM 6 SEP</span></div>
+            <div class="track">
+              <div class="stop free"><h4>Free tour<span class="free-tag">gratis</span></h4><p>Recorrido a pie por el centro histórico o Santa Teresa para cerrar la visita a la ciudad. Propina al guía.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Centro+Histórico+Rio+de+Janeiro">📍 Punto de inicio ↗</a></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="LUN 7 SEP">
+            <div class="day-box-head"><span class="dtag">LUN 7 SEP</span></div>
+            <div class="track">
+              <div class="stop"><div class="time">11:30</div><h4>Recogida del coche 🚗</h4><p>En Casa e Gourmet (Shopping), R. Gen. Severiano 97, Botafogo. A partir de aquí, ruta por la Costa Verde.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Casa+e+Gourmet+Rua+General+Severiano+97+Botafogo+Rio+de+Janeiro">📍 Ubicación ↗</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === ANGRA DOS REIS === -->
+    <div class="tabpanel" id="tab-angra" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏠 Vivienda en Angra dos Reis <span class="st-dates">7–10 sep</span></div>
+        <div class="st-addr">Rua Dibiase, 410 · Angra dos Reis · Rio de Janeiro · 23930-700. 2 dormitorios · 5 camas.</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Dibiase+410+Angra+dos+Reis+23930-700">📍 Ubicación ↗</a>
+          <a class="go book" target="_blank" rel="noopener" href="https://www.airbnb.es/rooms/1079584042832422193">🛏️ Airbnb ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <p class="day-sub">Bahía con 365 islas y aguas turquesa. Tres días de mar, buceo y casco colonial. El día que llegáis, en coche desde Río (~2,5 h).</p>
+        <div class="days">
+          <div class="day-box" data-day="7–10 SEP">
+            <div class="day-box-head"><span class="dtag">7–10 SEP · a tu aire</span></div>
+            <div class="track">
+              <div class="stop"><div class="time">Opción ⭐</div><h4>Alquilar un barco por la bahía</h4><p>La mejor forma de ver la Ilha Grande y las islas: contratar una lancha/goleta para el día, con paradas para bañarse y bucear.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Cais+de+Santa+Luzia+Angra+dos+Reis">📍 Puerto ↗</a></div>
+              <div class="stop free"><div class="time">Ciudad</div><h4>Casco Histórico de Angra<span class="free-tag">gratis</span></h4><p>Iglesias coloniales, el puerto y el centro para pasear. Buen sitio para cenar pescado fresco.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Centro+Histórico+Angra+dos+Reis">📍 Ubicación ↗</a></div>
+              <div class="stop star"><div class="time">Excursión</div><h4>Ilha Grande · buceo y paddlesurf</h4><p>Isla sin coches, playas de postal (Lopes Mendes) y selva atlántica. Planes: <b>buceo</b> en aguas claras y <b>paddlesurf</b> por las calas.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Ilha+Grande+Angra+dos+Reis">📍 Ubicación ↗</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === PARATY === -->
+    <div class="tabpanel" id="tab-paraty" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏠 Alojamiento en Paraty <span class="st-dates">10–11 sep</span></div>
+        <div class="st-addr">Avenida Octávio Gama, 184 · Portal · Paraty · CEP 23970-000. Con desayuno.</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Avenida+Octávio+Gama+184+Paraty+23970-000">📍 Ubicación ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <p class="day-sub">Pueblo colonial de calles empedradas entre el mar y la selva. Un día intenso; llega prontito para aprovechar.</p>
+        <div class="days">
+          <div class="day-box" data-day="10–11 SEP">
+            <div class="day-box-head"><span class="dtag">10–11 SEP</span></div>
+            <div class="track">
+              <div class="stop free"><div class="time">Mañana</div><h4>Free Tour por el Centro Histórico<span class="free-tag">gratis</span></h4><p>Calles empedradas, casonas blancas con puertas de colores e iglesias del s. XVIII. Patrimonio de la Humanidad.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Centro+Histórico+de+Paraty">📍 Ubicación ↗</a></div>
+              <div class="stop"><div class="time">Mediodía</div><h4>Tobogán Natural (Cachoeira do Tobogã)</h4><p>Roca lisa por la que se desliza el río como un tobogán natural. Muy divertido; ojo que resbala.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Cachoeira+do+Tobogã+Paraty">📍 Ubicación ↗</a></div>
+              <div class="stop star"><div class="time">Tarde</div><h4>Tour en barco + Playa Escondida</h4><p>Paseo en goleta por la bahía de Paraty con paradas en playas e islas para nadar y hacer snorkel. Cierra en una playa escondida.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Cais+de+Paraty+passeio+de+barco">📍 Puerto ↗</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === SÃO PAULO (VUELTA) === -->
+    <div class="tabpanel" id="tab-sp2" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏠 Alojamiento en São Paulo <span class="st-dates">11–12 sep</span></div>
+        <div class="st-addr">Rua Eleonora Cintra, 960 · São Paulo · CEP 03337-000. Con desayuno.</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Eleonora+Cintra+960+São+Paulo+03337-000">📍 Ubicación ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <p class="day-sub">Vuelta a São Paulo por carretera para cerrar el viaje con la familia antes de volar.</p>
+        <div class="days">
+          <div class="day-box" data-day="VIE 11 SEP">
+            <div class="day-box-head"><span class="dtag">VIE 11 SEP</span></div>
+            <div class="track">
+              <div class="stop star"><div class="time">Noche</div><h4>Cena con la familia García Grecco</h4><p>Llegada desde la Costa Verde justo para cenar con la familia.</p></div>
+            </div>
+          </div>
+          <div class="day-box" data-day="SÁB 12 SEP">
+            <div class="day-box-head"><span class="dtag">SÁB 12 SEP</span></div>
+            <div class="track">
+              <div class="stop"><div class="time">Mañana</div><h4>Almuerzo con la familia García Grecco</h4><p>Última comida juntos antes de ir al aeropuerto.</p></div>
+              <div class="stop"><h4>Devolver el coche 🚗</h4><p>Entrega del coche de alquiler con margen antes del vuelo.</p></div>
+              <div class="stop"><div class="time">Vuelo 19:20</div><h4>Vuelo de vuelta desde GRU 🛫</h4><p>Aeropuerto de Guarulhos (GRU). Sal con tiempo: es grande y suele haber colas en facturación y control.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Aeroporto+de+Guarulhos+GRU">📍 Aeropuerto GRU ↗</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- MAPA -->
+  <section class="sec" id="mapa">
+    <div class="sec-h"><span class="dot"></span>El mapa del viaje</div>
+    <div id="map"></div>
+    <div class="map-legend">
+      <span class="lg"><span class="pin" style="background:#009739"></span>São Paulo</span>
+      <span class="lg"><span class="pin" style="background:#012169"></span>Foz do Iguaçu</span>
+      <span class="lg"><span class="pin" style="background:#e0002d"></span>Río de Janeiro</span>
+      <span class="lg"><span class="pin" style="background:#00a6a6"></span>Angra dos Reis</span>
+      <span class="lg"><span class="pin" style="background:#f2a900"></span>Paraty</span>
+      <span class="lg"><span class="pin" style="background:#7b3fbf"></span>Vuelos</span>
+    </div>
+    <p class="map-note">Todos los puntos del plan sobre el mapa. Toca un pin para ver la info y abrir la <b>ubicación directa en Google Maps</b>. Arrastra y haz zoom para moverte entre etapas.</p>
+  </section>
+
+  <!-- COMER -->
+  <section class="sec" id="comer">
+    <div class="sec-h"><span class="dot"></span>Comer rico y barato por ubicación</div>
+    <div class="tabgroup reveal">
+      <div class="tabs" role="tablist" aria-label="Comer por ubicación">
+        <button class="tab active" role="tab" data-tab="food-sp">🇧🇷 São Paulo</button>
+        <button class="tab" role="tab" data-tab="food-foz">💦 Foz do Iguaçu</button>
+        <button class="tab" role="tab" data-tab="food-rio">⛰️ Río de Janeiro</button>
+        <button class="tab" role="tab" data-tab="food-costa">⛵ Costa Verde</button>
+      </div>
+      <div class="tabpanel active" id="tab-food-sp" role="tabpanel">
+        <div class="card">
+          <div class="row"><span>Mercadão <small>Sanduíche de mortadela + pastel de bacalhau</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Mercado+Municipal+de+São+Paulo">📍 dónde ↗</a></span><b>25-45 R$<small>~4-7 €</small></b></div>
+          <div class="row"><span>Pizza paulistana <small>SP es la capital brasileña de la pizza</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Pizzaria+Bráz+Pinheiros+São+Paulo">📍 Bráz Pinheiros ↗</a></span><b>50-90 R$<small>~8-15 €</small></b></div>
+          <div class="row"><span>Esfiha y comida árabe <small>Herencia libanesa · barato y rico</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=esfiharia+São+Paulo">📍 dónde ↗</a></span><b>6-15 R$<small>~1-2 €</small></b></div>
+          <div class="row"><span>Liberdade <small>Ramen, yakisoba y gyoza en el barrio japonés</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=ramen+Liberdade+São+Paulo">📍 en Liberdade ↗</a></span><b>35-60 R$<small>~6-10 €</small></b></div>
+          <div class="row"><span>Comida por kilo <small>Buffet al peso · mediodía sano y económico</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=restaurante+por+quilo+São+Paulo">📍 cerca de ti ↗</a></span><b>40-60 R$<small>~6-10 €</small></b></div>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-food-foz" role="tabpanel">
+        <div class="card">
+          <div class="row"><span>Rodízio de carnes <small>Buffet libre · reponer tras las cataratas</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Búfalo+Branco+Foz+do+Iguaçu">📍 Búfalo Branco ↗</a></span><b>60-100 R$<small>~10-16 €</small></b></div>
+          <div class="row"><span>Peixe de río <small>Surubí o dorado · cocina paranaense</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=restaurante+peixe+Foz+do+Iguaçu">📍 dónde ↗</a></span><b>50-90 R$<small>~8-15 €</small></b></div>
+          <div class="row"><span>Marco das Três Fronteiras <small>Caipirinha al atardecer, vistas a 3 países</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Marco+das+Três+Fronteiras+Foz+do+Iguaçu">📍 el mirador ↗</a></span><b>25-40 R$<small>~4-6 €</small></b></div>
+          <div class="row"><span>Açaí / sorvete <small>Para el calor húmedo</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=açaí+Foz+do+Iguaçu">📍 dónde ↗</a></span><b>15-30 R$<small>~2-5 €</small></b></div>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-food-rio" role="tabpanel">
+        <div class="card">
+          <div class="row"><span>Boteco <small>Petiscos + chopp bien frío · el plan carioca</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Bar+Urca+Rio+de+Janeiro">📍 Bar Urca ↗</a></span><b>40-80 R$<small>~6-13 €</small></b></div>
+          <div class="row"><span>Feijoada <small>Los sábados · el plato nacional</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Bar+do+Mineiro+Santa+Teresa+Rio+de+Janeiro">📍 Bar do Mineiro ↗</a></span><b>50-80 R$<small>~8-13 €</small></b></div>
+          <div class="row"><span>Açaí na tigela + sucos <small>Energía tropical · en cualquier esquina</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Bibi+Sucos+Rio+de+Janeiro">📍 Bibi Sucos ↗</a></span><b>15-35 R$<small>~2-6 €</small></b></div>
+          <div class="row"><span>Biscoito Globo + mate <small>El clásico de la playa de Copacabana</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Praia+de+Ipanema+Rio+de+Janeiro">📍 en la playa ↗</a></span><b>5-12 R$<small>~1-2 €</small></b></div>
+          <div class="row"><span>Churrascaria <small>Carne a discreción para un capricho</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Churrascaria+Palace+Rio+de+Janeiro">📍 Palace ↗</a></span><b>90-160 R$<small>~15-26 €</small></b></div>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-food-costa" role="tabpanel">
+        <div class="card">
+          <div class="row"><span>Frutos do mar <small>Camarão, lula y ostras fresquísimos</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=restaurante+frutos+do+mar+Angra+dos+Reis">📍 en Angra ↗</a></span><b>60-120 R$<small>~10-19 €</small></b></div>
+          <div class="row"><span>Moqueca <small>Guiso de pescado con leche de coco · para 2</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Banana+da+Terra+Paraty">📍 Banana da Terra ↗</a></span><b>90-150 R$<small>~15-24 €</small></b></div>
+          <div class="row"><span>Peixe grelhado <small>Pescado a la brasa frente al mar</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=peixe+grelhado+Paraty">📍 dónde ↗</a></span><b>50-90 R$<small>~8-15 €</small></b></div>
+          <div class="row"><span>Caipirinha de frutas <small>De maracujá, morango o limão</small><a class="golink" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=bar+Centro+Histórico+Paraty">📍 en el centro ↗</a></span><b>20-35 R$<small>~3-6 €</small></b></div>
+        </div>
+      </div>
+    </div>
+    <p class="wx-note">Truco en cualquier ubicación: el <i>prato feito</i> (PF) del mediodía y los buffets <b>por kilo</b> llenan por poco dinero. Prioriza comer fuerte a mediodía.</p>
+  </section>
+
+  <!-- ESENCIALES -->
+  <section class="sec" id="esenciales">
+    <div class="sec-h"><span class="dot"></span>Esenciales por ubicación</div>
+    <div class="tabgroup reveal">
+      <div class="tabs" role="tablist" aria-label="Esenciales por ubicación">
+        <button class="tab active" role="tab" data-tab="ess-gen">🎒 General</button>
+        <button class="tab" role="tab" data-tab="ess-sp">🇧🇷 São Paulo</button>
+        <button class="tab" role="tab" data-tab="ess-foz">💦 Foz do Iguaçu</button>
+        <button class="tab" role="tab" data-tab="ess-rio">⛰️ Río</button>
+        <button class="tab" role="tab" data-tab="ess-costa">⛵ Costa Verde</button>
+      </div>
+      <div class="tabpanel active" id="tab-ess-gen" role="tabpanel">
+        <div class="card"><ul class="tips">
+          <li><b>Pasaporte en vigor</b> + copias (en papel y foto en el móvil).</li>
+          <li><b>Adaptador de enchufe tipo N</b> y comprobar el voltaje (127 V / 220 V según ciudad).</li>
+          <li><b>Tarjeta que funcione fuera</b> + algo de efectivo. Instala <b>Pix</b> si puedes.</li>
+          <li><b>Seguro de viaje</b> y móvil con eSIM o roaming activado.</li>
+          <li>Consulta la <b>vacuna de la fiebre amarilla</b> (recomendada para zonas de selva).</li>
+          <li>Apps: <b>Uber / 99</b>, Google Maps, WhatsApp y iFood instaladas.</li>
+        </ul></div>
+      </div>
+      <div class="tabpanel" id="tab-ess-sp" role="tabpanel">
+        <div class="card"><ul class="tips">
+          <li><b>Ropa elegante para la boda</b> (30 ago) + calzado cómodo aparte.</li>
+          <li><b>Abrigo ligero</b>: refresca bastante de noche (baja a 12–14°).</li>
+          <li><b>Paraguas plegable</b> por si cae algún chubasco.</li>
+          <li>Cuenta con <b>tráfico</b> en los traslados: sal siempre con margen.</li>
+          <li>Zona de la boda (Sítio Barrocada) está <b>al norte</b>: organiza el transporte de ida y vuelta.</li>
+        </ul></div>
+      </div>
+      <div class="tabpanel" id="tab-ess-foz" role="tabpanel">
+        <div class="card"><ul class="tips">
+          <li><b>Pasaporte</b> imprescindible para cruzar al <b>lado argentino</b>.</li>
+          <li><b>Chubasquero/impermeable</b> y calzado que se pueda mojar.</li>
+          <li><b>Funda o bolsa estanca</b> para el móvil (cataratas y rafting).</li>
+          <li><b>Muda de ropa seca</b> para después del rafting.</li>
+          <li><b>Repelente</b> de mosquitos y protección solar.</li>
+        </ul></div>
+      </div>
+      <div class="tabpanel" id="tab-ess-rio" role="tabpanel">
+        <div class="card"><ul class="tips">
+          <li><b>Bañador, chanclas y toalla fina</b> de playa.</li>
+          <li><b>Protección solar alta</b> y gorra; bebe mucha agua.</li>
+          <li>A la playa, <b>lo mínimo y nada de valor</b>; riñonera discreta.</li>
+          <li><b>Efectivo suelto</b> para los quioscos de playa.</li>
+          <li><b>Zapatillas cómodas</b> para el Cristo y el Pan de Azúcar.</li>
+          <li>En favelas y de noche, <b>siempre con guía / en Uber</b>.</li>
+        </ul></div>
+      </div>
+      <div class="tabpanel" id="tab-ess-costa" role="tabpanel">
+        <div class="card"><ul class="tips">
+          <li><b>Bañador y gafas de snorkel</b> propias.</li>
+          <li><b>Escarpines</b> para rocas y muelles.</li>
+          <li><b>Protección solar resistente al agua</b> y repelente.</li>
+          <li><b>Efectivo</b>: en las islas puede no haber datáfono.</li>
+          <li><b>Pastillas para el mareo</b> si haces travesías en barco.</li>
+          <li>Bolsa seca para llevar lo justo en las excursiones de mar.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONSEJOS -->
+  <section class="sec" id="consejos">
+    <div class="sec-h"><span class="dot"></span>Consejos míticos</div>
+    <div class="card reveal">
+      <ul class="tips">
+        <li><b>Enchufe y voltaje:</b> Brasil usa enchufe tipo N (3 patas) y conviven <b>127 V y 220 V</b> según la ciudad. Lleva adaptador y comprueba el voltaje antes de cargar.</li>
+        <li><b>Paga con tarjeta y usa Pix.</b> La tarjeta se acepta en casi todo; el <i>Pix</i> es el pago instantáneo local. Lleva algo de efectivo para playas y puestos callejeros.</li>
+        <li><b>Frontera de Iguazú:</b> para el lado argentino <b>lleva el pasaporte</b>; consulta si necesitas algo para el cruce el mismo día.</li>
+        <li><b>No bebas agua del grifo.</b> Compra agua embotellada o filtrada. Protección solar y repelente, sobre todo en la Costa Verde.</li>
+        <li><b>Seguridad con sentido común:</b> no exhibas móvil ni cámara en zonas concurridas, deja el pasaporte en el alojamiento y usa Uber/99 de noche. En favelas, siempre con guía.</li>
+        <li><b>Coche por la Costa Verde:</b> la BR-101 entre Río, Angra y Paraty es preciosa pero de curvas; conduce de día y sin prisa.</li>
+        <li><b>Precios y horarios aproximados:</b> confírmalos en las webs oficiales, sobre todo entradas (Cristo, Pan de Azúcar, cataratas) y los tours.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PALABRAS -->
+  <section class="sec" id="portugues">
+    <div class="sec-h"><span class="dot"></span>Vocabulario en portugués</div>
+    <div class="card reveal">
+      <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px;margin-bottom:10px;color:var(--green-d)">Básico</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px">
+        <div class="row"><span><b>Oi / Olá</b></span><b style="color:var(--green-d)">hola</b></div>
+        <div class="row"><span><b>Bom dia</b></span><b style="color:var(--green-d)">buenos días</b></div>
+        <div class="row"><span><b>Boa tarde</b></span><b style="color:var(--green-d)">buenas tardes</b></div>
+        <div class="row"><span><b>Boa noite</b></span><b style="color:var(--green-d)">buenas noches</b></div>
+        <div class="row"><span><b>Tchau</b></span><b style="color:var(--green-d)">adiós</b></div>
+        <div class="row"><span><b>Sim / Não</b></span><b style="color:var(--green-d)">sí / no</b></div>
+        <div class="row"><span><b>Obrigado/a</b></span><b style="color:var(--green-d)">gracias</b></div>
+        <div class="row"><span><b>Valeu</b></span><b style="color:var(--green-d)">gracias (coloq.)</b></div>
+        <div class="row"><span><b>De nada</b></span><b style="color:var(--green-d)">de nada</b></div>
+        <div class="row"><span><b>Por favor</b></span><b style="color:var(--green-d)">por favor</b></div>
+        <div class="row"><span><b>Desculpa</b></span><b style="color:var(--green-d)">perdona</b></div>
+        <div class="row"><span><b>Com licença</b></span><b style="color:var(--green-d)">permiso / perdón</b></div>
+      </div>
+      <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px;margin:18px 0 10px;color:var(--green-d)">Útiles del día a día</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px">
+        <div class="row"><span><b>Quanto custa?</b></span><b style="color:var(--green-d)">¿cuánto es?</b></div>
+        <div class="row"><span><b>A conta, por favor</b></span><b style="color:var(--green-d)">la cuenta</b></div>
+        <div class="row"><span><b>Onde fica…?</b></span><b style="color:var(--green-d)">¿dónde está…?</b></div>
+        <div class="row"><span><b>Você tem…?</b></span><b style="color:var(--green-d)">¿tienes…?</b></div>
+        <div class="row"><span><b>Água</b></span><b style="color:var(--green-d)">agua</b></div>
+        <div class="row"><span><b>Banheiro</b></span><b style="color:var(--green-d)">aseo / baño</b></div>
+        <div class="row"><span><b>Ônibus</b></span><b style="color:var(--green-d)">autobús</b></div>
+        <div class="row"><span><b>Praia</b></span><b style="color:var(--green-d)">playa</b></div>
+        <div class="row"><span><b>Cerveja</b></span><b style="color:var(--green-d)">cerveza</b></div>
+        <div class="row"><span><b>Gostoso</b></span><b style="color:var(--green-d)">rico (sabroso)</b></div>
+        <div class="row"><span><b>Legal / Massa</b></span><b style="color:var(--green-d)">guay / genial</b></div>
+        <div class="row"><span><b>Beleza?</b></span><b style="color:var(--green-d)">¿todo bien?</b></div>
+        <div class="row"><span><b>Bora!</b></span><b style="color:var(--green-d)">¡vamos!</b></div>
+        <div class="row"><span><b>Saúde</b></span><b style="color:var(--green-d)">¡salud!</b></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <svg class="ffl" viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="10" fill="#009739"/><polygon points="8,1 15,5 8,9 1,5" fill="#fedd00"/><circle cx="8" cy="5" r="2.1" fill="#012169"/></svg>
+    <p><b>Brasil · 27 ago–12 sep.</b> Boa viagem y... <i>saúde!</i> 🍹<br>
+    Precios en reales brasileños (R$). 1 € ≈ 6,2 R$ (aproximado). Ubicaciones enlazadas a Google Maps.</p>
+  </footer>
+
+</div>
+
+<script>
+  /* ===== reveal on scroll ===== */
+  (function(){
+    if(!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
+      var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
+      document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+    }else{
+      document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in')});
+    }
+  })();
+
+  /* ===== calculadora ===== */
+  (function(){
+    var rate=document.getElementById('rate'),eur=document.getElementById('eur'),brl=document.getElementById('brl');
+    function r(){var v=parseFloat(rate.value);return (isFinite(v)&&v>0)?v:6.2;}
+    function round(n){return Math.round(n*100)/100;}
+    eur.addEventListener('input',function(){var v=parseFloat(eur.value);brl.value=isFinite(v)?round(v*r()):'';});
+    brl.addEventListener('input',function(){var v=parseFloat(brl.value);eur.value=isFinite(v)?round(v/r()):'';});
+    rate.addEventListener('input',function(){var v=parseFloat(eur.value);if(isFinite(v)){brl.value=round(v*r());}else{var s=parseFloat(brl.value);if(isFinite(s))eur.value=round(s/r());}});
+  })();
+
+  /* ===== tabs (scoped por grupo) ===== */
+  (function(){
+    document.querySelectorAll('.tabgroup').forEach(function(grp){
+      var tabs=[].slice.call(grp.querySelectorAll('.tab'));
+      var panels=[].slice.call(grp.querySelectorAll('.tabpanel'));
+      tabs.forEach(function(t){
+        t.addEventListener('click',function(){
+          tabs.forEach(function(x){x.classList.remove('active');});
+          panels.forEach(function(p){p.classList.remove('active');});
+          t.classList.add('active');
+          var p=grp.querySelector('#tab-'+t.getAttribute('data-tab'));
+          if(p)p.classList.add('active');
+        });
+      });
+    });
+  })();
+
+  /* ===== scrollspy navbar ===== */
+  (function(){
+    var links=[].slice.call(document.querySelectorAll('.nav-links a'));
+    var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
+    var secs=[].slice.call(document.querySelectorAll('section[id]'));
+    var spy=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){
+          links.forEach(function(a){a.classList.remove('active');});
+          if(map[e.target.id])map[e.target.id].classList.add('active');
+        }
+      });
+    },{rootMargin:'-55px 0px -70% 0px'});
+    secs.forEach(function(s){spy.observe(s);});
+  })();
+
+  /* ===== altura real de la navbar (para sticky y anclas) ===== */
+  (function(){
+    var nav=document.querySelector('.nav');if(!nav)return;
+    function setH(){document.documentElement.style.setProperty('--navh',nav.offsetHeight+'px');}
+    setH();window.addEventListener('resize',setH);window.addEventListener('load',setH);
+  })();
+
+  /* ===== flechas de desplazamiento en las tabs ===== */
+  (function(){
+    document.querySelectorAll('.tabs').forEach(function(tabs){
+      var row=document.createElement('div');row.className='tabsrow';
+      if(tabs.classList.contains('sticky')){row.classList.add('sticky');tabs.classList.remove('sticky');}
+      tabs.parentNode.insertBefore(row,tabs);
+      function arrow(txt){var b=document.createElement('button');b.type='button';b.className='tabs-arrow';b.textContent=txt;b.setAttribute('aria-hidden','true');b.tabIndex=-1;return b;}
+      var l=arrow('‹'),r=arrow('›');
+      row.appendChild(l);row.appendChild(tabs);row.appendChild(r);
+      function upd(){var max=tabs.scrollWidth-tabs.clientWidth;l.style.visibility=tabs.scrollLeft>4?'visible':'hidden';r.style.visibility=tabs.scrollLeft<max-4?'visible':'hidden';}
+      l.addEventListener('click',function(){tabs.scrollBy({left:-180,behavior:'smooth'});});
+      r.addEventListener('click',function(){tabs.scrollBy({left:180,behavior:'smooth'});});
+      tabs.addEventListener('scroll',upd);window.addEventListener('resize',upd);setTimeout(upd,80);
+      tabs.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});});});
+    });
+  })();
+
+  /* ===== pronóstico en vivo por ubicación (Open-Meteo) ===== */
+  (function(){
+    var DIAS=['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+    function ic(c){
+      if(c===0)return'☀️';if(c===1)return'🌤️';if(c===2)return'⛅';if(c===3)return'☁️';
+      if(c===45||c===48)return'🌫️';if(c>=51&&c<=57)return'🌦️';if(c>=61&&c<=67)return'🌧️';
+      if(c>=71&&c<=77)return'🌨️';if(c>=80&&c<=82)return'🌦️';if(c>=85&&c<=86)return'🌨️';
+      if(c>=95)return'⛈️';return'🌡️';
+    }
+    document.querySelectorAll('.wxwrap').forEach(function(el){
+      var la=el.getAttribute('data-lat'),lo=el.getAttribute('data-lon'),s=el.getAttribute('data-start'),e=el.getAttribute('data-end');
+      if(!la||!lo||typeof fetch!=='function')return;
+      var url='https://api.open-meteo.com/v1/forecast?latitude='+la+'&longitude='+lo+'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=America%2FSao_Paulo&start_date='+s+'&end_date='+e;
+      fetch(url).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){
+        var dd=d.daily;if(!dd||!dd.time||!dd.time.length)throw 0;
+        var html='<div class="wx">';
+        for(var i=0;i<dd.time.length;i++){
+          var p=dd.time[i].split('-');var dt=new Date(+p[0],+p[1]-1,+p[2]);
+          var mxv=dd.temperature_2m_max[i],mnv=dd.temperature_2m_min[i];
+          var mx=(mxv==null)?'—':Math.round(mxv)+'°';var mn=(mnv==null)?'—':Math.round(mnv)+'°';
+          var pr=(dd.precipitation_probability_max&&dd.precipitation_probability_max[i]!=null)?dd.precipitation_probability_max[i]+'%':'—';
+          html+='<div class="wx-day"><div class="d">'+DIAS[dt.getDay()]+' '+p[2]+'</div><div class="ic">'+ic(dd.weather_code[i])+'</div><div class="t">'+mx+'</div><div class="r">'+mn+' · 🌧️'+pr+'</div></div>';
+        }
+        html+='</div>';el.innerHTML=html;
+        var live=el.parentNode.querySelector('.wx-live');
+        if(live)live.textContent='✅ Pronóstico en vivo (Open-Meteo) para las fechas de esta ubicación. Máx · mín · prob. de lluvia.';
+      }).catch(function(){/* se queda la estimación */});
+    });
+  })();
+
+  /* ===== marcar visto + reordenar paradas entre días (persistente) ===== */
+  (function(){
+    var NS='bitacora.brasil.v1';var store={checked:{},boxes:{}};
+    try{var raw=localStorage.getItem(NS);if(raw){var o=JSON.parse(raw);if(o){store.checked=o.checked||{};store.boxes=o.boxes||{};}}}catch(e){}
+    function save(){try{localStorage.setItem(NS,JSON.stringify({checked:store.checked,boxes:store.boxes}));}catch(e){}}
+    function esc(k){return (window.CSS&&CSS.escape)?CSS.escape(k):k.replace(/[^a-zA-Z0-9_-]/g,'\\$&');}
+    function slug(t){return t.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48);}
+    function prevStop(s){var p=s.previousElementSibling;while(p&&!p.classList.contains('stop'))p=p.previousElementSibling;return p;}
+    function nextStop(s){var n=s.nextElementSibling;while(n&&!n.classList.contains('stop'))n=n.nextElementSibling;return n;}
+    function adjBox(b,dir){var x=dir<0?b.previousElementSibling:b.nextElementSibling;while(x&&!x.classList.contains('day-box'))x=dir<0?x.previousElementSibling:x.nextElementSibling;return x;}
+    function saveLayout(panel,tid){var m={};[].slice.call(panel.querySelectorAll('.day-box')).forEach(function(box){m[box.getAttribute('data-box')]=[].slice.call(box.querySelectorAll('.stop')).map(function(s){return s.getAttribute('data-k');});});store.boxes[tid]=m;save();}
+    document.querySelectorAll('.tabgroup .tabpanel').forEach(function(panel){
+      if(!panel.querySelector('.day-box'))return;
+      var tid=panel.id;
+      [].slice.call(panel.querySelectorAll('.day-box')).forEach(function(box){box.setAttribute('data-box',tid+'#'+slug(box.getAttribute('data-day')));});
+      [].slice.call(panel.querySelectorAll('.stop')).forEach(function(s){
+        var h=s.querySelector('h4');var k=tid+'::'+slug(h?h.textContent:s.textContent);
+        s.setAttribute('data-k',k);s.classList.add('has-tools');
+        var tools=document.createElement('div');tools.className='stop-tools';
+        var chk=document.createElement('button');chk.type='button';chk.className='chk';chk.title='Marcar como visto';chk.setAttribute('aria-label','Marcar como visto');chk.textContent='✓';
+        var up=document.createElement('button');up.type='button';up.title='Subir (o pasar al día anterior)';up.setAttribute('aria-label','Subir');up.textContent='▲';
+        var dn=document.createElement('button');dn.type='button';dn.title='Bajar (o pasar al día siguiente)';dn.setAttribute('aria-label','Bajar');dn.textContent='▼';
+        tools.appendChild(chk);tools.appendChild(up);tools.appendChild(dn);
+        s.insertBefore(tools,s.firstChild);
+        if(store.checked[k])s.classList.add('done');
+        chk.addEventListener('click',function(){s.classList.toggle('done');if(s.classList.contains('done'))store.checked[k]=1;else delete store.checked[k];save();});
+        up.addEventListener('click',function(){move(s,-1,panel,tid);});
+        dn.addEventListener('click',function(){move(s,1,panel,tid);});
+      });
+      var saved=store.boxes[tid];
+      if(saved){Object.keys(saved).forEach(function(bid){var box=panel.querySelector('.day-box[data-box="'+esc(bid)+'"]');if(!box)return;var tr=box.querySelector('.track');saved[bid].forEach(function(k){var el=panel.querySelector('.stop[data-k="'+esc(k)+'"]');if(el&&tr)tr.appendChild(el);});});}
+    });
+    function move(s,dir,panel,tid){
+      var track=s.parentNode;var sib=dir<0?prevStop(s):nextStop(s);
+      if(sib){if(dir<0)track.insertBefore(s,sib);else track.insertBefore(sib,s);}
+      else{var box=s.closest('.day-box');var tb=adjBox(box,dir);if(tb){var tt=tb.querySelector('.track');if(dir<0)tt.appendChild(s);else tt.insertBefore(s,tt.firstChild);}}
+      saveLayout(panel,tid);
+    }
+  })();
+
+  /* ===== mapa (Leaflet + OpenStreetMap) ===== */
+  (function(){
+    if(typeof L==='undefined'){document.getElementById('map').innerHTML='<p style="padding:20px;color:#5a6b5e;font-size:14px">No se pudo cargar el mapa (sin conexión). Los enlaces de ubicación de cada punto siguen funcionando.</p>';return;}
+    var C={sp:'#009739',foz:'#012169',rio:'#e0002d',angra:'#00a6a6',paraty:'#f2a900',fly:'#7b3fbf'};
+    function g(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
+    var PTS=[
+      // São Paulo (ida y vuelta)
+      {c:'sp', ll:[-23.5665,-46.5350], t:'Airbnb São Paulo (ida)', i:'Rua Camberra 352 · base 27–31 ago', q:'Rua Camberra 352 São Paulo 03357-010'},
+      {c:'sp', ll:[-23.5453,-46.6339], t:'Mirador Farol Santander', i:'Vistas 360° de la ciudad desde el piso 26', q:'Farol Santander São Paulo'},
+      {c:'sp', ll:[-23.5505,-46.6339], t:'Free Tour · Praça da Sé', i:'Centro histórico: Catedral, Pátio do Colégio', q:'Praça da Sé São Paulo'},
+      {c:'sp', ll:[-23.5614,-46.6558], t:'Avenida Paulista · MASP', i:'La arteria de la ciudad y su museo icónico', q:'Avenida Paulista MASP São Paulo'},
+      {c:'sp', ll:[-23.5416,-46.6294], t:'Mercadão', i:'Mercado Municipal · sanduíche de mortadela', q:'Mercado Municipal de São Paulo'},
+      {c:'sp', ll:[-23.5587,-46.6350], t:'Liberdade · Barrio Japonés', i:'El mayor barrio japonés fuera de Japón', q:'Liberdade São Paulo'},
+      {c:'sp', ll:[-23.5490,-46.6900], t:'Despedida de solteros', i:'Rua Harmonia 77 · Vila Madalena · 28 ago', q:'Rua Harmonia 77 Vila Madalena São Paulo 05435-000'},
+      {c:'sp', ll:[-23.4350,-46.6030], t:'Boda 💒', i:'Av. Cel. Sezefredo Fagundes 6123 · Sítio Barrocada · 30 ago', q:'Av. Cel. Sezefredo Fagundes 6123 Sítio Barrocada São Paulo'},
+      {c:'sp', ll:[-23.5560,-46.5450], t:'Alojamiento São Paulo (vuelta)', i:'Rua Eleonora Cintra 960 · 11–12 sep', q:'Rua Eleonora Cintra 960 São Paulo 03337-000'},
+      // Foz do Iguaçu
+      {c:'foz', ll:[-25.5478,-54.5882], t:'Hotel Foz do Iguaçu', i:'Rua Marechal Deodoro 984 · Centro · 31 ago–3 sep', q:'Rua Marechal Deodoro 984 Foz do Iguaçu 85851-030'},
+      {c:'foz', ll:[-25.6866,-54.4451], t:'Cataratas · lado Argentino', i:'Circuitos Inferior/Superior y Garganta del Diablo', q:'Garganta del Diablo Cataratas del Iguazú Argentina'},
+      {c:'foz', ll:[-25.6953,-54.4367], t:'Cataratas · lado Brasileño', i:'Trilha das Cataratas y Elevador Panorámico', q:'Trilha das Cataratas Parque Nacional do Iguaçu'},
+      {c:'foz', ll:[-25.6606,-54.4389], t:'Rafting · Macuco Safari', i:'Aventura en el río bajo las cataratas', q:'Macuco Safari Foz do Iguaçu'},
+      // Río de Janeiro
+      {c:'rio', ll:[-22.9680,-43.1800], t:'Airbnb Río · Copacabana', i:'R. Duvivier 64 · Copacabana · 3–7 sep', q:'R. Duvivier 64 Copacabana Rio de Janeiro 22020-020'},
+      {c:'rio', ll:[-22.9519,-43.2105], t:'Cristo Redentor', i:'La postal de Brasil sobre el Corcovado', q:'Cristo Redentor Corcovado'},
+      {c:'rio', ll:[-22.9152,-43.1791], t:'Escadaria Selarón', i:'Escaleras de azulejos de colores', q:'Escadaria Selarón Rio de Janeiro'},
+      {c:'rio', ll:[-22.9121,-43.2302], t:'Maracanã', i:'Fluminense vs Vasco da Gama', q:'Estádio do Maracanã Rio de Janeiro'},
+      {c:'rio', ll:[-22.9487,-43.1912], t:'Favela Santa Marta', i:'Tour guiado y mirador', q:'Favela Santa Marta Rio de Janeiro'},
+      {c:'rio', ll:[-22.9678,-43.2295], t:'Jardín Botánico', i:'Palmeras imperiales y orquídeas', q:'Jardim Botânico Rio de Janeiro'},
+      {c:'rio', ll:[-22.9486,-43.1566], t:'Pão de Açúcar', i:'Teleférico con vistas a la bahía', q:'Bondinho Pão de Açúcar Rio'},
+      {c:'rio', ll:[-22.9515,-43.1830], t:'Recogida del coche · Botafogo', i:'Casa e Gourmet · R. Gen. Severiano 97', q:'Casa e Gourmet Rua General Severiano 97 Botafogo Rio de Janeiro'},
+      // Angra dos Reis
+      {c:'angra', ll:[-23.0060,-44.3180], t:'Vivienda Angra dos Reis', i:'Rua Dibiase 410 · 7–10 sep', q:'Rua Dibiase 410 Angra dos Reis 23930-700'},
+      {c:'angra', ll:[-23.0069,-44.3181], t:'Casco Histórico de Angra', i:'Iglesias coloniales y puerto', q:'Centro Histórico Angra dos Reis'},
+      {c:'angra', ll:[-23.1430,-44.1730], t:'Ilha Grande', i:'Buceo, paddlesurf y playas de postal', q:'Ilha Grande Angra dos Reis'},
+      // Paraty
+      {c:'paraty', ll:[-23.2135,-44.7180], t:'Alojamiento Paraty', i:'Av. Octávio Gama 184 · 10–11 sep', q:'Avenida Octávio Gama 184 Paraty 23970-000'},
+      {c:'paraty', ll:[-23.2196,-44.7130], t:'Centro Histórico de Paraty', i:'Calles empedradas · Patrimonio de la Humanidad', q:'Centro Histórico de Paraty'},
+      {c:'paraty', ll:[-23.2560,-44.7830], t:'Cachoeira do Tobogã', i:'Tobogán natural de roca', q:'Cachoeira do Tobogã Paraty'},
+      {c:'paraty', ll:[-23.2170,-44.7140], t:'Tour en barco · bahía de Paraty', i:'Goleta por islas y playa escondida', q:'Cais de Paraty passeio de barco'},
+      // Vuelos / aeropuertos
+      {c:'fly', ll:[-23.4356,-46.4731], t:'Aeropuerto GRU (São Paulo)', i:'Llegada 27 ago · vuelta 12 sep 19:20', q:'Aeroporto de Guarulhos GRU'},
+      {c:'fly', ll:[-25.6003,-54.4850], t:'Aeropuerto Foz do Iguaçu (IGU)', i:'Vuelos 31 ago y 3 sep', q:'Aeroporto Foz do Iguaçu IGU'},
+      {c:'fly', ll:[-22.8100,-43.2506], t:'Aeropuerto Galeão Río (GIG)', i:'Llegada 3 sep', q:'Aeroporto Internacional do Galeão GIG'}
+    ];
+    var map=L.map('map',{scrollWheelZoom:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);
+    var group=[];
+    PTS.forEach(function(p){
+      var col=C[p.c]||'#009739';
+      var icon=L.divIcon({className:'',iconSize:[18,18],iconAnchor:[9,9],
+        html:'<div style="width:16px;height:16px;border-radius:50%;background:'+col+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>'});
+      var m=L.marker(p.ll,{icon:icon,title:p.t}).addTo(map);
+      m.bindPopup('<b>'+p.t+'</b><span class="pop-info">'+p.i+'</span><a href="'+g(p.q)+'" target="_blank" rel="noopener">📍 Abrir en Google Maps ↗</a>');
+      group.push(m);
+    });
+    map.fitBounds(L.featureGroup(group).getBounds().pad(0.12));
+  })();
+</script>
+</body>
+</html>
