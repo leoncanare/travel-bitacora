@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root{
     --green:#009739;      /* verde bandera Brasil */
@@ -28,7 +30,7 @@
   section[id]{scroll-margin-top:66px}
 
   /* ---------- NAVBAR ---------- */
-  .nav{position:sticky;top:0;z-index:50;background:var(--green-dd);border-bottom:3px solid var(--yellow);box-shadow:0 2px 12px rgba(0,0,0,.18)}
+  .nav{position:sticky;top:0;z-index:1000;background:var(--green-dd);border-bottom:3px solid var(--yellow);box-shadow:0 2px 12px rgba(0,0,0,.18)}
   .nav-inner{max-width:760px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:9px 14px;min-height:52px}
   .nav-back{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#cfeed8;text-decoration:none;padding:6px 10px;border-radius:7px;flex:none;transition:color .15s,background .15s}
   .nav-back:hover{color:#fff;background:rgba(255,255,255,.10)}
@@ -67,7 +69,7 @@
   .day{margin-bottom:30px}
   .day-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap}
   .day-tag{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--yellow);background:var(--green-d);padding:4px 10px;border-radius:6px;letter-spacing:.04em}
-  .day-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:22px}
+  .day-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:20px}
   .day-sub{color:var(--muted);font-size:14px;margin:2px 0 16px}
 
   .track{position:relative;padding-left:26px}
@@ -75,13 +77,17 @@
   .stop{position:relative;padding:0 0 18px}
   .stop::before{content:"";position:absolute;left:-26px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--card);border:3px solid var(--yellow)}
   .stop.free::before{border-color:var(--green)}
+  .stop.star::before{border-color:var(--blue);background:var(--blue)}
   .time{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--gold-deep);margin-bottom:1px}
   .stop h4{font-size:15.5px;font-weight:600}
   .stop p{font-size:14px;color:var(--muted);margin-top:2px}
   .price{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11.5px;background:#fbf3cf;color:var(--gold-deep);padding:1px 7px;border-radius:5px;margin-left:4px}
   .free-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11.5px;background:#d8efdf;color:var(--green-d);padding:1px 7px;border-radius:5px;margin-left:4px}
+  .opt-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11.5px;background:#e6e2f2;color:var(--blue);padding:1px 7px;border-radius:5px;margin-left:4px}
   .go{display:inline-flex;align-items:center;gap:4px;margin:7px 6px 0 0;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--green-d);text-decoration:none;border:1px solid #c7e0cf;background:#fff;padding:5px 11px;border-radius:999px;transition:background .15s,border-color .15s}
   .go:hover{background:#e6f6ec;border-color:var(--green)}
+  .go.book{color:var(--blue);border-color:#c3c9e0}
+  .go.book:hover{background:#eef0f9;border-color:var(--blue)}
 
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:560px){.grid{grid-template-columns:1fr}}
@@ -103,6 +109,37 @@
   ul.tips li::before{content:"›";position:absolute;left:4px;top:7px;color:var(--gold-deep);font-weight:800}
   ul.tips b{color:var(--ink)}
 
+  /* ---------- MAPA ---------- */
+  #map{height:440px;border-radius:14px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(20,38,26,.06);z-index:1}
+  @media(max-width:560px){#map{height:360px}}
+  .map-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:14px}
+  .map-legend .lg{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--ink)}
+  .map-legend .pin{width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+  .map-note{font-size:12.5px;color:var(--muted);margin-top:12px}
+  .leaflet-popup-content{font-family:'Inter',system-ui,sans-serif;font-size:13px;margin:12px 14px}
+  .leaflet-popup-content b{font-family:'Bricolage Grotesque',sans-serif}
+  .leaflet-popup-content .pop-info{color:var(--muted);display:block;margin:4px 0 8px}
+  .leaflet-popup-content a{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--green-d);text-decoration:none}
+
+  /* ---------- TABS ---------- */
+  .tabs{position:sticky;top:52px;z-index:40;display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin-bottom:8px;background:var(--paper);-webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:var(--green-d);background:#fff;border:1px solid var(--line);padding:8px 13px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+  .tab:hover{background:#e6f6ec;border-color:var(--green)}
+  .tab.active{color:#fff;background:var(--green);border-color:var(--green)}
+  .tab small{display:block;font-weight:500;font-size:10px;color:inherit;opacity:.85;letter-spacing:.02em}
+  .tabpanel{display:none;animation:fade .35s ease}
+  .tabpanel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.tabpanel{animation:none}}
+
+  /* alojamiento */
+  .stay{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--green);border-radius:12px;padding:15px 17px;margin-bottom:22px}
+  .stay .st-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px}
+  .stay .st-dates{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:#fff;background:var(--green-d);padding:2px 8px;border-radius:5px}
+  .stay .st-addr{font-size:13.5px;color:var(--muted);margin-bottom:9px}
+  .stay .st-links{display:flex;flex-wrap:wrap;gap:7px}
+
   /* currency */
   .cur-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:560px){.cur-grid{grid-template-columns:1fr}}
@@ -120,7 +157,6 @@
   .wx{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
   @media(max-width:560px){.wx{grid-template-columns:repeat(3,1fr)}}
   .wx-day{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 8px;text-align:center;min-width:0}
-  .wx-day.na{opacity:.65}
   .wx-day .d{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--green-d)}
   .wx-day .ic{font-size:26px;margin:6px 0;line-height:1}
   .wx-day .t{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;color:var(--ink)}
@@ -143,7 +179,7 @@
     h1{font-size:clamp(40px,15vw,60px)}
     .sub{font-size:15px}
     .day-head{gap:10px}
-    .day-title{font-size:19px}
+    .day-title{font-size:18px}
     .day-tag{font-size:12px}
     .stop h4{font-size:15px}
     .card{padding:16px 16px}
@@ -169,11 +205,11 @@
       Brasil
     </span>
     <div class="nav-links">
+      <a href="#mapa">Mapa</a>
+      <a href="#plan">Ruta</a>
       <a href="#cambio">Cambio</a>
       <a href="#tiempo">Tiempo</a>
-      <a href="#plan">Ruta</a>
       <a href="#comer">Comer</a>
-      <a href="#transporte">Transporte</a>
       <a href="#consejos">Consejos</a>
       <a href="#portugues">Portugués</a>
     </div>
@@ -185,19 +221,177 @@
   <div class="sun" aria-hidden="true"></div>
   <div class="wrap">
     <svg class="hero-flag" viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="10" fill="#009739"/><polygon points="8,1 15,5 8,9 1,5" fill="#fedd00"/><circle cx="8" cy="5" r="2.1" fill="#012169"/></svg>
-    <div class="eyebrow">Mié 26 ago — Sáb 12 sep · 2026</div>
+    <div class="eyebrow">27 ago — 12 sep · 2026</div>
     <h1>Brasil<span>gran ruta</span></h1>
-    <p class="sub">Dieciocho días de norte a sur: playas de Río, las cataratas de Iguazú, el pulso de São Paulo, el alma bahiana de Salvador y la selva por el Amazonas. Ordem e progresso.</p>
+    <p class="sub">Diecisiete días entre boda, cataratas y playas: São Paulo, las cataratas de Iguazú, Río de Janeiro y la Costa Verde (Angra dos Reis y Paraty). Ordem e progresso.</p>
     <div class="meta">
-      <span class="chip">🗺️ <b>5 etapas</b></span>
-      <span class="chip">📅 <b>18 días</b></span>
-      <span class="chip">🌡️ Primavera austral</span>
+      <span class="chip">🗺️ <b>6 etapas</b></span>
+      <span class="chip">📅 <b>17 días</b></span>
+      <span class="chip">💒 Boda 30 ago</span>
       <span class="chip">💱 1€ ≈ <b>6,2 R$</b></span>
     </div>
   </div>
 </header>
 
 <div class="wrap">
+
+  <!-- MAPA -->
+  <section class="sec" id="mapa">
+    <div class="sec-h"><span class="dot"></span>El mapa del viaje</div>
+    <div id="map"></div>
+    <div class="map-legend">
+      <span class="lg"><span class="pin" style="background:#009739"></span>São Paulo</span>
+      <span class="lg"><span class="pin" style="background:#012169"></span>Foz do Iguaçu</span>
+      <span class="lg"><span class="pin" style="background:#e0002d"></span>Río de Janeiro</span>
+      <span class="lg"><span class="pin" style="background:#00a6a6"></span>Angra dos Reis</span>
+      <span class="lg"><span class="pin" style="background:#f2a900"></span>Paraty</span>
+      <span class="lg"><span class="pin" style="background:#7b3fbf"></span>Vuelos</span>
+    </div>
+    <p class="map-note">Todos los puntos del plan sobre el mapa. Toca un pin para ver la info y abrir la <b>ubicación directa en Google Maps</b>. Arrastra y haz zoom para moverte entre etapas.</p>
+  </section>
+
+  <!-- ITINERARIO CON TABS -->
+  <section class="sec" id="plan">
+    <div class="sec-h"><span class="dot"></span>La ruta, etapa a etapa</div>
+
+    <div class="tabs" role="tablist" aria-label="Etapas del viaje">
+      <button class="tab active" role="tab" data-tab="sp1">🇧🇷 São Paulo<small>27–31 ago</small></button>
+      <button class="tab" role="tab" data-tab="foz">💦 Foz do Iguaçu<small>31 ago–3 sep</small></button>
+      <button class="tab" role="tab" data-tab="rio">⛰️ Río de Janeiro<small>3–7 sep</small></button>
+      <button class="tab" role="tab" data-tab="angra">⛵ Angra dos Reis<small>7–10 sep</small></button>
+      <button class="tab" role="tab" data-tab="paraty">🏖️ Paraty<small>10–11 sep</small></button>
+      <button class="tab" role="tab" data-tab="sp2">✈️ São Paulo<small>11–12 sep</small></button>
+    </div>
+
+    <!-- === SÃO PAULO (IDA) === -->
+    <div class="tabpanel active" id="tab-sp1" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏠 Airbnb en São Paulo <span class="st-dates">27–31 ago</span></div>
+        <div class="st-addr">Rua Camberra, 352 · 03357-010 · São Paulo. Entrada 27 a las 14:00 · salida 31 a las 11:00.</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Camberra+352+São+Paulo+03357-010">📍 Ubicación ↗</a>
+          <a class="go book" target="_blank" rel="noopener" href="https://www.airbnb.es/rooms/888417364681663256">🛏️ Airbnb ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <div class="track">
+          <div class="stop"><div class="time">JUE 27 AGO · llegada 05:55</div><h4>Modistas</h4><p>Nada más aterrizar, cita con las modistas para los arreglos de la ropa de la boda. Después, descanso y primera toma de contacto con la ciudad.</p></div>
+          <div class="stop free"><div class="time">VIE 28 AGO</div><h4>Free Tour por el centro<span class="free-tag">gratis</span></h4><p>La mejor forma de ubicarse: centro histórico, Catedral da Sé, Pátio do Colégio y el Theatro Municipal. Deja propina al guía.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Praça+da+Sé+São+Paulo">📍 Punto de inicio ↗</a></div>
+          <div class="stop"><div class="time">VIE 28 AGO</div><h4>Mirador Farol Santander<span class="price">~R$25 · ~4€</span></h4><p>La torre-mirador (antigua Torre Santander) con vistas 360° de la megaciudad desde el piso 26. Ideal al atardecer.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Farol+Santander+São+Paulo">📍 Ubicación ↗</a></div>
+          <div class="stop star"><div class="time">VIE 28 AGO · 18:00</div><h4>🎉 Despedida de solteros</h4><p>Noche de despedida. Reserva sitio con antelación y organiza los traslados de vuelta (Uber/99).</p></div>
+          <div class="stop"><div class="time">SÁB 29 AGO</div><h4>Avenida Paulista</h4><p>La arteria de la ciudad: el MASP y su colección colgada en cristal. Los domingos es peatonal, pero en sábado también se vive.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Avenida+Paulista+MASP+São+Paulo">📍 Ubicación ↗</a></div>
+          <div class="stop"><div class="time">SÁB 29 AGO</div><h4>Mercado Municipal (Mercadão)</h4><p>Prueba el mítico <i>sanduíche de mortadela</i> y el pastel de bacalao bajo las vidrieras. Mercado de frutas exóticas para picar.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Mercado+Municipal+de+São+Paulo">📍 Ubicación ↗</a></div>
+          <div class="stop"><div class="time">SÁB 29 AGO</div><h4>Barrio Japonés · Liberdade</h4><p>El mayor barrio japonés fuera de Japón: farolillos, tiendas asiáticas y ramen. Los findes hay feria callejera.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Liberdade+São+Paulo">📍 Ubicación ↗</a></div>
+          <div class="stop star"><div class="time">DOM 30 AGO</div><h4>💒 Boda</h4><p>El gran día. Todo el día reservado para la celebración.</p></div>
+          <div class="stop"><div class="time">LUN 31 AGO · 11:00</div><h4>Checkout y salida al aeropuerto ✈️</h4><p>Deja el Airbnb a las 11:00 y al aeropuerto: vuelo a Foz do Iguaçu a las 12:05. Ve con margen.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === FOZ DO IGUAÇU === -->
+    <div class="tabpanel" id="tab-foz" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏨 Hotel en Foz do Iguaçu <span class="st-dates">31 ago–3 sep</span></div>
+        <div class="st-addr">Rua Marechal Deodoro, 984 · Centro · Foz do Iguaçu · CEP 85851-030. 3 noches + desayuno (6 pax · 597€).</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Marechal+Deodoro+984+Centro+Foz+do+Iguaçu+85851-030">📍 Ubicación ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <div class="track">
+          <div class="stop"><div class="time">LUN 31 AGO · vuelo 12:05 → 13:55</div><h4>Vuelo São Paulo → Foz do Iguaçu</h4><p>Llegada y traslado al hotel (~20:00 instalados). Tarde tranquila; muchos hoteles tienen piscina para el calor.</p></div>
+          <div class="stop"><div class="time">MAR 1 SEP · lado ARGENTINO</div><h4>Cataratas de Iguazú (Argentina)<span class="price">tour + entrada</span></h4><p>El día grande: <b>Circuito Inferior</b>, <b>Circuito Superior</b> y el trenecito hasta la <b>Garganta del Diablo</b>. Cruzas frontera: <b>lleva pasaporte</b>. Llévate chubasquero.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Garganta+del+Diablo+Cataratas+del+Iguazú+Argentina">📍 Ubicación ↗</a> <a class="go book" target="_blank" rel="noopener" href="https://www.civitatis.com/es/puerto-iguazu/excursion-cataratas-iguazu/">🎫 Tour Civitatis ↗</a></div>
+          <div class="stop"><div class="time">MIÉ 2 SEP · lado BRASILEÑO</div><h4>Rafting · Macuco Safari<span class="price">reservar el día 1</span></h4><p>Aventura en el río Iguaçu por debajo de las cataratas. Confírmalo el primer día del tour. Emociones fuertes garantizadas.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Macuco+Safari+Foz+do+Iguaçu">📍 Ubicación ↗</a> <a class="go book" target="_blank" rel="noopener" href="https://ingressos.macucosafari.com.br/">🎫 Entradas ↗</a></div>
+          <div class="stop"><div class="time">MIÉ 2 SEP</div><h4>Trilha das Cataratas + Garganta del Diablo (pasarela)</h4><p>La panorámica completa desde Brasil: sendero entre saltos y la pasarela que te mete dentro de la Garganta. Remata con el <b>Elevador Panorámico</b>.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Trilha+das+Cataratas+Parque+Nacional+do+Iguaçu">📍 Ubicación ↗</a></div>
+          <div class="stop"><div class="time">JUE 3 SEP · vuelo 10:15 → 12:15</div><h4>Checkout y vuelo a Río 🛫</h4><p>Salida temprana. Vuelo Foz do Iguaçu → Río de Janeiro (GIG), llegada 12:15.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === RÍO DE JANEIRO === -->
+    <div class="tabpanel" id="tab-rio" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏠 Airbnb en Río de Janeiro <span class="st-dates">3–7 sep</span></div>
+        <div class="st-addr">Apartamento · 2 dormitorios · 3 baños. Recogida del coche el día 7 (~11:30) en Botafogo.</div>
+        <div class="st-links">
+          <a class="go book" target="_blank" rel="noopener" href="https://www.airbnb.es/rooms/1605040176128811220">🛏️ Airbnb ↗</a>
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Casa+e+Gourmet+Rua+General+Severiano+97+Botafogo+Rio+de+Janeiro">🚗 Recogida coche ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <div class="track">
+          <div class="stop free"><div class="time">JUE 3 SEP</div><h4>Aterrizar y playa<span class="free-tag">relax</span></h4><p>Comer, primera vuelta por las playas, duchita y salir por la zona. Día de aclimatación al ritmo carioca.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Praia+de+Copacabana+Rio+de+Janeiro">📍 Copacabana ↗</a></div>
+          <div class="stop"><div class="time">VIE 4 SEP</div><h4>Cristo Redentor · Corcovado<span class="price">~R$115 · ~19€</span></h4><p>La postal de Brasil sobre el cerro del Corcovado. Reserva online y ve temprano para esquivar nubes y colas.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Cristo+Redentor+Corcovado">📍 Ubicación ↗</a></div>
+          <div class="stop free"><div class="time">VIE 4 SEP</div><h4>Escadaria Selarón<span class="free-tag">gratis</span></h4><p>Las escaleras de azulejos de colores del artista Selarón, entre Lapa y Santa Teresa. Foto obligada.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Escadaria+Selarón+Rio+de+Janeiro">📍 Ubicación ↗</a></div>
+          <div class="stop star"><div class="time">VIE 4 SEP · noche</div><h4>Fluminense vs Vasco da Gama <span class="opt-tag">o helicóptero</span></h4><p>Derbi carioca en el Maracanã, ambientazo asegurado. <b>Alternativa:</b> vuelo panorámico en helicóptero sobre el Cristo y la bahía.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Estádio+do+Maracanã+Rio+de+Janeiro">📍 Maracanã ↗</a></div>
+          <div class="stop"><div class="time">SÁB 5 SEP</div><h4>Favela Santa Marta</h4><p>Favela pacificada y segura con tour guiado (la del videoclip de Michael Jackson). Vistas y mirador con la estatua. Ve siempre con guía local.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Favela+Santa+Marta+Rio+de+Janeiro">📍 Ubicación ↗</a></div>
+          <div class="stop"><div class="time">SÁB 5 SEP</div><h4>Jardín Botánico<span class="price">~R$70 · ~11€</span></h4><p>Palmeras imperiales gigantes, orquídeas y bromelias. Oasis verde a los pies del Corcovado.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Jardim+Botânico+Rio+de+Janeiro">📍 Ubicación ↗</a></div>
+          <div class="stop"><div class="time">SÁB 5 SEP · atardecer</div><h4>Pão de Açúcar (Pan de Azúcar)<span class="price">~R$150 · ~24€</span></h4><p>Teleférico en dos tramos con las mejores vistas de la bahía. Reserva el atardecer para la mejor luz.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Bondinho+Pão+de+Açúcar+Rio">📍 Ubicación ↗</a></div>
+          <div class="stop free"><div class="time">DOM 6 SEP</div><h4>Free tour<span class="free-tag">gratis</span></h4><p>Recorrido a pie por el centro histórico o Santa Teresa para cerrar la visita a la ciudad. Propina al guía.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Centro+Histórico+Rio+de+Janeiro">📍 Punto de inicio ↗</a></div>
+          <div class="stop"><div class="time">LUN 7 SEP · 11:30</div><h4>Recogida del coche 🚗</h4><p>En Casa e Gourmet (Shopping), R. Gen. Severiano 97, Botafogo. A partir de aquí, ruta por la Costa Verde.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Casa+e+Gourmet+Rua+General+Severiano+97+Botafogo+Rio+de+Janeiro">📍 Ubicación ↗</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === ANGRA DOS REIS === -->
+    <div class="tabpanel" id="tab-angra" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏠 Vivienda en Angra dos Reis <span class="st-dates">7–10 sep</span></div>
+        <div class="st-addr">Rua Dibiase, 410 · Angra dos Reis · Rio de Janeiro · 23930-700. 2 dormitorios · 5 camas.</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Dibiase+410+Angra+dos+Reis+23930-700">📍 Ubicación ↗</a>
+          <a class="go book" target="_blank" rel="noopener" href="https://www.airbnb.es/rooms/1079584042832422193">🛏️ Airbnb ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <p class="day-sub">Bahía con 365 islas y aguas turquesa. Tres días de mar, buceo y casco colonial. El día que llegáis, en coche desde Río (~2,5 h).</p>
+        <div class="track">
+          <div class="stop"><div class="time">OPCIÓN ⭐</div><h4>Alquilar un barco por la bahía</h4><p>La mejor forma de ver la Ilha Grande y las islas: contratar una lancha/goleta para el día, con paradas para bañarse y bucear.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Cais+de+Santa+Luzia+Angra+dos+Reis">📍 Puerto ↗</a></div>
+          <div class="stop free"><div class="time">CIUDAD</div><h4>Casco Histórico de Angra<span class="free-tag">gratis</span></h4><p>Iglesias coloniales, el puerto y el centro para pasear. Buen sitio para cenar pescado fresco.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Centro+Histórico+Angra+dos+Reis">📍 Ubicación ↗</a></div>
+          <div class="stop star"><div class="time">EXCURSIÓN</div><h4>Ilha Grande · buceo y paddlesurf</h4><p>Isla sin coches, playas de postal (Lopes Mendes) y selva atlántica. Planes: <b>buceo</b> en aguas claras y <b>paddlesurf</b> por las calas.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Ilha+Grande+Angra+dos+Reis">📍 Ubicación ↗</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === PARATY === -->
+    <div class="tabpanel" id="tab-paraty" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏠 Alojamiento en Paraty <span class="st-dates">10–11 sep</span></div>
+        <div class="st-addr">Avenida Octávio Gama, 184 · Portal · Paraty · CEP 23970-000. Con desayuno.</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Avenida+Octávio+Gama+184+Paraty+23970-000">📍 Ubicación ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <p class="day-sub">Pueblo colonial de calles empedradas entre el mar y la selva. Un día intenso; llega prontito para aprovechar.</p>
+        <div class="track">
+          <div class="stop free"><div class="time">MAÑANA</div><h4>Free Tour por el Centro Histórico<span class="free-tag">gratis</span></h4><p>Calles empedradas, casonas blancas con puertas de colores e iglesias del s. XVIII. Patrimonio de la Humanidad.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Centro+Histórico+de+Paraty">📍 Ubicación ↗</a></div>
+          <div class="stop"><div class="time">MEDIODÍA</div><h4>Tobogán Natural (Cachoeira do Tobogã)</h4><p>Roca lisa por la que se desliza el río como un tobogán natural. Muy divertido; ojo que resbala.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Cachoeira+do+Tobogã+Paraty">📍 Ubicación ↗</a></div>
+          <div class="stop star"><div class="time">TARDE</div><h4>Tour en barco + Playa Escondida</h4><p>Paseo en goleta por la bahía de Paraty con paradas en playas e islas para nadar y hacer snorkel. Cierra en una playa escondida.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Cais+de+Paraty+passeio+de+barco">📍 Puerto ↗</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === SÃO PAULO (VUELTA) === -->
+    <div class="tabpanel" id="tab-sp2" role="tabpanel">
+      <div class="stay">
+        <div class="st-h">🏠 Alojamiento en São Paulo <span class="st-dates">11–12 sep</span></div>
+        <div class="st-addr">Rua Eleonora Cintra, 960 · São Paulo · CEP 03337-000. Con desayuno.</div>
+        <div class="st-links">
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Eleonora+Cintra+960+São+Paulo+03337-000">📍 Ubicación ↗</a>
+        </div>
+      </div>
+      <div class="day reveal">
+        <p class="day-sub">Vuelta a São Paulo por carretera para cerrar el viaje con la familia antes de volar.</p>
+        <div class="track">
+          <div class="stop star"><div class="time">VIE 11 SEP · noche</div><h4>Cena con la familia García Grecco</h4><p>Llegada desde la Costa Verde justo para cenar con la familia.</p></div>
+          <div class="stop"><div class="time">SÁB 12 SEP · mañana</div><h4>Almuerzo con la familia García Grecco</h4><p>Última comida juntos antes de ir al aeropuerto.</p></div>
+          <div class="stop"><div class="time">SÁB 12 SEP</div><h4>Devolver el coche 🚗</h4><p>Entrega del coche de alquiler con margen antes del vuelo.</p></div>
+          <div class="stop"><div class="time">SÁB 12 SEP · vuelo 19:20</div><h4>Vuelo de vuelta desde GRU 🛫</h4><p>Aeropuerto de Guarulhos (GRU). Sal con tiempo: es grande y suele haber colas en facturación y control.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Aeroporto+de+Guarulhos+GRU">📍 Aeropuerto GRU ↗</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- CAMBIO DE MONEDA -->
   <section class="sec" id="cambio">
@@ -231,71 +425,13 @@
     <div class="sec-h"><span class="dot"></span>El tiempo por etapas</div>
     <div class="card reveal">
       <div class="wx">
-        <div class="wx-day"><div class="d">RÍO</div><div class="ic">☀️</div><div class="t">27°</div><div class="r">🌧️ 20%</div></div>
-        <div class="wx-day"><div class="d">IGUAZÚ</div><div class="ic">🌤️</div><div class="t">24°</div><div class="r">🌧️ 40%</div></div>
         <div class="wx-day"><div class="d">SÃO PAULO</div><div class="ic">🌦️</div><div class="t">22°</div><div class="r">🌧️ 45%</div></div>
-        <div class="wx-day"><div class="d">SALVADOR</div><div class="ic">☀️</div><div class="t">28°</div><div class="r">🌧️ 30%</div></div>
-        <div class="wx-day"><div class="d">MANAOS</div><div class="ic">⛅</div><div class="t">33°</div><div class="r">🌧️ 50%</div></div>
+        <div class="wx-day"><div class="d">FOZ</div><div class="ic">🌤️</div><div class="t">24°</div><div class="r">🌧️ 40%</div></div>
+        <div class="wx-day"><div class="d">RÍO</div><div class="ic">☀️</div><div class="t">27°</div><div class="r">🌧️ 20%</div></div>
+        <div class="wx-day"><div class="d">ANGRA</div><div class="ic">⛅</div><div class="t">26°</div><div class="r">🌧️ 30%</div></div>
+        <div class="wx-day"><div class="d">PARATY</div><div class="ic">🌦️</div><div class="t">25°</div><div class="r">🌧️ 40%</div></div>
       </div>
-      <p class="wx-note">Máximas típicas de finales de agosto–septiembre (fin del invierno / inicio de la primavera austral). En el sur (São Paulo, Iguazú) puede refrescar de noche: lleva una <b>chaqueta fina</b>. En el nordeste y el Amazonas hace <b>calor y humedad</b> todo el año; ropa ligera, gorra y protección solar. Consulta la previsión concreta unos días antes de cada etapa.</p>
-    </div>
-  </section>
-
-  <!-- ITINERARIO -->
-  <section class="sec" id="plan">
-    <div class="sec-h"><span class="dot"></span>La ruta, etapa a etapa</div>
-
-    <div class="day reveal">
-      <div class="day-head"><span class="day-tag">26–31 AGO</span><span class="day-title">Río de Janeiro</span></div>
-      <p class="day-sub">La postal de Brasil: montañas, playas y samba. Base para los primeros seis días.</p>
-      <div class="track">
-        <div class="stop"><div class="time">DÍA 1</div><h4>Llegada al Galeão (GIG) → Copacabana/Ipanema</h4><p>Del aeropuerto al alojamiento en taxi oficial o Uber (~40-60 min). Primera tarde de playa y caipirinha al atardecer.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Praia+de+Ipanema+Rio+de+Janeiro">Ubicación ↗</a></div>
-        <div class="stop"><div class="time">DÍA 2</div><h4>Cristo Redentor · Corcovado<span class="price">~R$115 · ~19€</span></h4><p>Sube en el tren del Corcovado. Reserva online y ve temprano para esquivar nubes y colas.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Cristo+Redentor+Corcovado">Cómo llegar ↗</a></div>
-        <div class="stop"><div class="time">DÍA 3</div><h4>Pão de Açúcar (Pan de Azúcar)<span class="price">~R$150 · ~24€</span></h4><p>Teleférico en dos tramos con las mejores vistas de la bahía. Ideal al atardecer.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Bondinho+Pão+de+Açúcar">Cómo llegar ↗</a></div>
-        <div class="stop free"><div class="time">DÍA 4</div><h4>Santa Teresa + Escadaria Selarón<span class="free-tag">gratis</span></h4><p>Barrio bohemio en tranvía (bondinho), las escaleras de azulejos de Selarón y la bajada a Lapa.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Escadaria+Selarón+Rio">Cómo llegar ↗</a></div>
-        <div class="stop"><div class="time">DÍA 5</div><h4>Maracanã + noche de samba en Lapa<span class="price">entrada estadio ~R$100 · ~16€</span></h4><p>Tour por el templo del fútbol y, de noche, los arcos de Lapa: música en vivo y baile hasta tarde.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Arcos+da+Lapa+Rio">Cómo llegar ↗</a></div>
-      </div>
-    </div>
-
-    <div class="day reveal">
-      <div class="day-head"><span class="day-tag">31 AGO–2 SEP</span><span class="day-title">Foz do Iguaçu · Cataratas</span></div>
-      <p class="day-sub">Vuelo interno al sur. Una de las mayores cataratas del mundo, entre Brasil y Argentina.</p>
-      <div class="track">
-        <div class="stop"><div class="time">DÍA 6</div><h4>Vuelo Río → Foz do Iguaçu (IGU)</h4><p>~2h de vuelo. Tarde tranquila; muchos hoteles tienen piscina para el calor.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Foz+do+Iguaçu">Ubicación ↗</a></div>
-        <div class="stop"><div class="time">DÍA 7</div><h4>Cataratas lado brasileño + Parque das Aves<span class="price">~R$100 + R$75 · ~28€</span></h4><p>La panorámica completa desde las pasarelas y el aviario justo al lado. Llévate chubasquero.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Cataratas+do+Iguaçu+lado+brasileiro">Cómo llegar ↗</a></div>
-        <div class="stop"><div class="time">DÍA 8</div><h4>Lado argentino · Garganta del Diablo<span class="price">~AR$ / lleva pasaporte</span></h4><p>Cruzas la frontera para vivir las cataratas de cerca. Trenecito hasta la Garganta del Diablo. (Opción: Itaipú por la tarde.)</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Garganta+del+Diablo+Iguazú">Cómo llegar ↗</a></div>
-      </div>
-    </div>
-
-    <div class="day reveal">
-      <div class="day-head"><span class="day-tag">2–5 SEP</span><span class="day-title">São Paulo</span></div>
-      <p class="day-sub">La megaciudad: arte, rascacielos, gastronomía sin fin y street art.</p>
-      <div class="track">
-        <div class="stop"><div class="time">DÍA 9</div><h4>Vuelo a São Paulo + Avenida Paulista<span class="price">MASP ~R$60 · ~10€</span></h4><p>El eje de la ciudad. El MASP y su colección colgada en atriles de cristal. Los domingos, la avenida es peatonal.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Avenida+Paulista+MASP">Cómo llegar ↗</a></div>
-        <div class="stop free"><div class="time">DÍA 10</div><h4>Beco do Batman + Vila Madalena<span class="free-tag">gratis</span></h4><p>El callejón más colorido de Brasil, en el barrio más bohemio. Bares y galerías para la noche.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Beco+do+Batman+São+Paulo">Cómo llegar ↗</a></div>
-        <div class="stop free"><div class="time">DÍA 11</div><h4>Parque Ibirapuera + Mercadão<span class="free-tag">parque gratis</span></h4><p>El "Central Park" paulista y, en el centro, el Mercado Municipal: prueba el <i>sanduíche de mortadela</i> y el pastel de bacalao.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Parque+Ibirapuera+São+Paulo">Cómo llegar ↗</a></div>
-      </div>
-    </div>
-
-    <div class="day reveal">
-      <div class="day-head"><span class="day-tag">5–9 SEP</span><span class="day-title">Salvador de Bahía</span></div>
-      <p class="day-sub">El corazón afrobrasileño: color, tambores, capoeira y la mejor comida del país.</p>
-      <div class="track">
-        <div class="stop free"><div class="time">DÍA 12</div><h4>Pelourinho + Elevador Lacerda<span class="free-tag">casi gratis</span></h4><p>Casco histórico colonial (Patrimonio de la Humanidad) y el ascensor art déco que une ciudad alta y baja.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Pelourinho+Salvador+Bahia">Cómo llegar ↗</a></div>
-        <div class="stop free"><div class="time">DÍA 13</div><h4>Farol da Barra + Porto da Barra<span class="free-tag">gratis</span></h4><p>El faro más fotografiado y una de las mejores playas urbanas para ver la puesta de sol. Prueba un <i>acarajé</i> de las baianas.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Farol+da+Barra+Salvador">Cómo llegar ↗</a></div>
-        <div class="stop"><div class="time">DÍA 14</div><h4>Excursión a Praia do Forte<span class="price">tour ~R$150 · ~24€</span></h4><p>Pueblo de pescadores, proyecto Tamar de tortugas y playas de piscinas naturales al norte de la ciudad.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Praia+do+Forte+Bahia">Cómo llegar ↗</a></div>
-        <div class="stop free"><div class="time">DÍA 15</div><h4>Capoeira + noche bahiana<span class="free-tag">roda gratis</span></h4><p>Rodas de capoeira en la calle, tambores del Olodum y cena de <i>moqueca</i> antes de seguir ruta.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Terreiro+de+Jesus+Salvador">Cómo llegar ↗</a></div>
-      </div>
-    </div>
-
-    <div class="day reveal">
-      <div class="day-head"><span class="day-tag">9–12 SEP</span><span class="day-title">Amazonas · Manaos</span></div>
-      <p class="day-sub">El broche: selva, ríos gigantes y el teatro en medio de la jungla. Vuelta a casa desde aquí.</p>
-      <div class="track">
-        <div class="stop"><div class="time">DÍA 16</div><h4>Vuelo a Manaos + Teatro Amazonas<span class="price">visita ~R$20 · ~3€</span></h4><p>La ópera rosada de la fiebre del caucho, en plena Amazonia. Paseo por el mercado Adolpho Lisboa.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Teatro+Amazonas+Manaus">Cómo llegar ↗</a></div>
-        <div class="stop"><div class="time">DÍA 17</div><h4>Encontro das Águas + lodge en la selva<span class="price">tour/lodge ~R$400+ · ~65€+</span></h4><p>Donde el Río Negro y el Solimões corren juntos sin mezclarse. Noche en un lodge: canoa, caimanes y amanecer en el río.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Encontro+das+Águas+Manaus">Cómo llegar ↗</a></div>
-        <div class="stop"><div class="time">DÍA 18</div><h4>Vuelta desde Manaos (MAO) 🛫</h4><p>Última mañana en la selva y vuelo de vuelta. Deja margen: los traslados desde el lodge llevan su tiempo.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Aeroporto+de+Manaus+MAO">Cómo llegar ↗</a></div>
-      </div>
+      <p class="wx-note">Máximas típicas de finales de agosto–septiembre (fin del invierno / inicio de la primavera austral). En São Paulo y Foz puede refrescar de noche: lleva una <b>chaqueta fina</b>. En Río y la Costa Verde hace más calor. Protección solar siempre y algo para la <b>lluvia ligera</b>.</p>
     </div>
   </section>
 
@@ -305,41 +441,10 @@
     <div class="card reveal">
       <div class="row"><span>Comida por kilo <small>Buffet al peso · en toda ciudad, sano y económico</small></span><b>40-60 R$<small>~6-10 €</small></b></div>
       <div class="row"><span>Feijoada <small>El plato nacional · tradición de sábado/miércoles</small></span><b>50-80 R$<small>~8-13 €</small></b></div>
-      <div class="row"><span>Acarajé <small>Bahía · buñuelo de frijol de las baianas en la calle</small></span><b>12-20 R$<small>~2-3 €</small></b></div>
       <div class="row"><span>Pão de queijo + café <small>Desayuno típico · en cualquier padaria</small></span><b>10-18 R$<small>~2-3 €</small></b></div>
       <div class="row"><span>Churrasco / rodízio <small>Carne a discreción · hambre de verdad</small></span><b>90-160 R$<small>~15-26 €</small></b></div>
+      <div class="row"><span>Caipirinha <small>La de siempre · o de frutas</small></span><b>18-30 R$<small>~3-5 €</small></b></div>
       <div class="row"><span>El truco local <small>El <i>prato feito</i> (PF) del mediodía llena por poco dinero; los buffets al peso son tu mejor amigo</small></span><b>R$</b></div>
-    </div>
-  </section>
-
-  <!-- TRANSPORTE -->
-  <section class="sec" id="transporte">
-    <div class="sec-h"><span class="dot"></span>Transporte y precios</div>
-    <div class="grid">
-      <div class="card reveal">
-        <h3>Moverte por ciudad</h3>
-        <div class="row"><span>Metro/bus sencillo</span><b>~5 R$<small>~0,8 €</small></b></div>
-        <div class="row"><span>Uber trayecto corto</span><b>15-30 R$<small>~2-5 €</small></b></div>
-        <div class="row"><span>Taxi del aeropuerto</span><b>60-120 R$<small>~10-19 €</small></b></div>
-        <div class="row"><span>Caipirinha</span><b>18-30 R$<small>~3-5 €</small></b></div>
-        <div class="row"><span>Cerveja (chopp)</span><b>10-18 R$<small>~2-3 €</small></b></div>
-      </div>
-      <div class="card reveal">
-        <h3>Entre etapas (vuelos)</h3>
-        <div class="row"><span>Río → Iguazú <small>~2 h</small></span><b>vuelo interno</b></div>
-        <div class="row"><span>Iguazú → São Paulo <small>~1,5 h</small></span><b>vuelo interno</b></div>
-        <div class="row"><span>São Paulo → Salvador <small>~2,5 h</small></span><b>vuelo interno</b></div>
-        <div class="row"><span>Salvador → Manaos <small>~3,5 h</small></span><b>vuelo interno</b></div>
-        <div class="row"><span>Consejo <small>Reserva los internos con antelación: cuestan mucho menos</small></span><b>✈️</b></div>
-      </div>
-    </div>
-    <div class="card reveal" style="margin-top:14px">
-      <h3>Apps útiles</h3>
-      <div class="row"><span>Uber / 99 <small>99 es la app local de VTC, suele salir más barata que Uber</small></span><b>VTC</b></div>
-      <div class="row"><span>Google Maps <small>Transporte público de las grandes ciudades bien integrado</small></span><b>mapas</b></div>
-      <div class="row"><span>iFood <small>Comida a domicilio, útil cuando no quieres salir</small></span><b>comida</b></div>
-      <div class="row"><span>WhatsApp <small>Todo el mundo lo usa: reservas, tours, taxis, alojamiento</small></span><b>contacto</b></div>
-      <div class="row"><span>⚠️ Ojo con la seguridad <small>No exhibas móvil ni cámara en zonas concurridas; usa VTC de noche en vez de andar</small></span><b>aviso</b></div>
     </div>
   </section>
 
@@ -348,13 +453,13 @@
     <div class="sec-h"><span class="dot"></span>Consejos míticos</div>
     <div class="card reveal">
       <ul class="tips">
-        <li><b>Enchufe y voltaje:</b> Brasil usa enchufe tipo N (clavija de 3 patas) y conviven <b>127 V y 220 V</b> según la ciudad. Lleva adaptador y comprueba el voltaje antes de cargar.</li>
+        <li><b>Enchufe y voltaje:</b> Brasil usa enchufe tipo N (3 patas) y conviven <b>127 V y 220 V</b> según la ciudad. Lleva adaptador y comprueba el voltaje antes de cargar.</li>
         <li><b>Paga con tarjeta y usa Pix.</b> La tarjeta se acepta en casi todo; el <i>Pix</i> es el pago instantáneo local. Lleva algo de efectivo para playas y puestos callejeros.</li>
-        <li><b>No bebas agua del grifo.</b> Compra agua embotellada o filtrada; el hielo de sitios formales suele ser seguro.</li>
-        <li><b>Protección solar y repelente</b> siempre, sobre todo en Bahía y el Amazonas. Consulta si tu ruta necesita <b>vacuna de la fiebre amarilla</b> (recomendada para zonas de selva).</li>
-        <li><b>Seguridad con sentido común:</b> deja el pasaporte en el hotel, saca copia, no lleves objetos de valor a la playa y evita zonas poco transitadas de noche.</li>
-        <li><b>Distancias enormes:</b> Brasil es un continente. Entre etapas se vuela, no se conduce; cuenta con medio día por cada traslado.</li>
-        <li><b>Precios y horarios aproximados:</b> confírmalos en las webs oficiales, sobre todo entradas (Cristo, Pão de Açúcar, cataratas) y los vuelos internos.</li>
+        <li><b>Frontera de Iguazú:</b> para el lado argentino <b>lleva el pasaporte</b>; consulta si necesitas algo para el cruce el mismo día.</li>
+        <li><b>No bebas agua del grifo.</b> Compra agua embotellada o filtrada. Protección solar y repelente, sobre todo en la Costa Verde.</li>
+        <li><b>Seguridad con sentido común:</b> no exhibas móvil ni cámara en zonas concurridas, deja el pasaporte en el alojamiento y usa Uber/99 de noche. En favelas, siempre con guía.</li>
+        <li><b>Coche por la Costa Verde:</b> la BR-101 entre Río, Angra y Paraty es preciosa pero de curvas; conduce de día y sin prisa.</li>
+        <li><b>Precios y horarios aproximados:</b> confírmalos en las webs oficiales, sobre todo entradas (Cristo, Pan de Azúcar, cataratas) y los tours.</li>
       </ul>
     </div>
   </section>
@@ -380,13 +485,14 @@
 
   <footer>
     <svg class="ffl" viewBox="0 0 16 10" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="10" fill="#009739"/><polygon points="8,1 15,5 8,9 1,5" fill="#fedd00"/><circle cx="8" cy="5" r="2.1" fill="#012169"/></svg>
-    <p><b>Brasil · 26 ago–12 sep.</b> Boa viagem y... <i>saúde!</i> 🍹<br>
-    Precios en reales brasileños (R$). 1 € ≈ 6,2 R$ (aproximado). Reserva los vuelos internos con tiempo.</p>
+    <p><b>Brasil · 27 ago–12 sep.</b> Boa viagem y... <i>saúde!</i> 🍹<br>
+    Precios en reales brasileños (R$). 1 € ≈ 6,2 R$ (aproximado). Ubicaciones enlazadas a Google Maps.</p>
   </footer>
 
 </div>
 
 <script>
+  /* ===== reveal on scroll ===== */
   (function(){
     if(!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
       var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
@@ -396,7 +502,7 @@
     }
   })();
 
-  /* calculadora */
+  /* ===== calculadora ===== */
   (function(){
     var rate=document.getElementById('rate'),eur=document.getElementById('eur'),brl=document.getElementById('brl');
     function r(){var v=parseFloat(rate.value);return (isFinite(v)&&v>0)?v:6.2;}
@@ -406,7 +512,22 @@
     rate.addEventListener('input',function(){var v=parseFloat(eur.value);if(isFinite(v)){brl.value=round(v*r());}else{var s=parseFloat(brl.value);if(isFinite(s))eur.value=round(s/r());}});
   })();
 
-  /* scrollspy navbar */
+  /* ===== tabs ===== */
+  (function(){
+    var tabs=[].slice.call(document.querySelectorAll('.tab'));
+    var panels=[].slice.call(document.querySelectorAll('.tabpanel'));
+    tabs.forEach(function(t){
+      t.addEventListener('click',function(){
+        tabs.forEach(function(x){x.classList.remove('active');});
+        panels.forEach(function(p){p.classList.remove('active');});
+        t.classList.add('active');
+        var p=document.getElementById('tab-'+t.getAttribute('data-tab'));
+        if(p)p.classList.add('active');
+      });
+    });
+  })();
+
+  /* ===== scrollspy navbar ===== */
   (function(){
     var links=[].slice.call(document.querySelectorAll('.nav-links a'));
     var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
@@ -420,6 +541,62 @@
       });
     },{rootMargin:'-55px 0px -70% 0px'});
     secs.forEach(function(s){spy.observe(s);});
+  })();
+
+  /* ===== mapa (Leaflet + OpenStreetMap) ===== */
+  (function(){
+    if(typeof L==='undefined'){document.getElementById('map').innerHTML='<p style="padding:20px;color:#5a6b5e;font-size:14px">No se pudo cargar el mapa (sin conexión). Los enlaces de ubicación de cada punto siguen funcionando.</p>';return;}
+    var C={sp:'#009739',foz:'#012169',rio:'#e0002d',angra:'#00a6a6',paraty:'#f2a900',fly:'#7b3fbf'};
+    function g(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
+    var PTS=[
+      // São Paulo (ida y vuelta)
+      {c:'sp', ll:[-23.5665,-46.5350], t:'Airbnb São Paulo (ida)', i:'Rua Camberra 352 · base 27–31 ago', q:'Rua Camberra 352 São Paulo 03357-010'},
+      {c:'sp', ll:[-23.5453,-46.6339], t:'Mirador Farol Santander', i:'Vistas 360° de la ciudad desde el piso 26', q:'Farol Santander São Paulo'},
+      {c:'sp', ll:[-23.5505,-46.6339], t:'Free Tour · Praça da Sé', i:'Centro histórico: Catedral, Pátio do Colégio', q:'Praça da Sé São Paulo'},
+      {c:'sp', ll:[-23.5614,-46.6558], t:'Avenida Paulista · MASP', i:'La arteria de la ciudad y su museo icónico', q:'Avenida Paulista MASP São Paulo'},
+      {c:'sp', ll:[-23.5416,-46.6294], t:'Mercadão', i:'Mercado Municipal · sanduíche de mortadela', q:'Mercado Municipal de São Paulo'},
+      {c:'sp', ll:[-23.5587,-46.6350], t:'Liberdade · Barrio Japonés', i:'El mayor barrio japonés fuera de Japón', q:'Liberdade São Paulo'},
+      {c:'sp', ll:[-23.5560,-46.5450], t:'Alojamiento São Paulo (vuelta)', i:'Rua Eleonora Cintra 960 · 11–12 sep', q:'Rua Eleonora Cintra 960 São Paulo 03337-000'},
+      // Foz do Iguaçu
+      {c:'foz', ll:[-25.5478,-54.5882], t:'Hotel Foz do Iguaçu', i:'Rua Marechal Deodoro 984 · Centro · 31 ago–3 sep', q:'Rua Marechal Deodoro 984 Foz do Iguaçu 85851-030'},
+      {c:'foz', ll:[-25.6866,-54.4451], t:'Cataratas · lado Argentino', i:'Circuitos Inferior/Superior y Garganta del Diablo', q:'Garganta del Diablo Cataratas del Iguazú Argentina'},
+      {c:'foz', ll:[-25.6953,-54.4367], t:'Cataratas · lado Brasileño', i:'Trilha das Cataratas y Elevador Panorámico', q:'Trilha das Cataratas Parque Nacional do Iguaçu'},
+      {c:'foz', ll:[-25.6606,-54.4389], t:'Rafting · Macuco Safari', i:'Aventura en el río bajo las cataratas', q:'Macuco Safari Foz do Iguaçu'},
+      // Río de Janeiro
+      {c:'rio', ll:[-22.9711,-43.1822], t:'Airbnb Río · Copacabana', i:'Base carioca · 3–7 sep', q:'Praia de Copacabana Rio de Janeiro'},
+      {c:'rio', ll:[-22.9519,-43.2105], t:'Cristo Redentor', i:'La postal de Brasil sobre el Corcovado', q:'Cristo Redentor Corcovado'},
+      {c:'rio', ll:[-22.9152,-43.1791], t:'Escadaria Selarón', i:'Escaleras de azulejos de colores', q:'Escadaria Selarón Rio de Janeiro'},
+      {c:'rio', ll:[-22.9121,-43.2302], t:'Maracanã', i:'Fluminense vs Vasco da Gama', q:'Estádio do Maracanã Rio de Janeiro'},
+      {c:'rio', ll:[-22.9487,-43.1912], t:'Favela Santa Marta', i:'Tour guiado y mirador', q:'Favela Santa Marta Rio de Janeiro'},
+      {c:'rio', ll:[-22.9678,-43.2295], t:'Jardín Botánico', i:'Palmeras imperiales y orquídeas', q:'Jardim Botânico Rio de Janeiro'},
+      {c:'rio', ll:[-22.9486,-43.1566], t:'Pão de Açúcar', i:'Teleférico con vistas a la bahía', q:'Bondinho Pão de Açúcar Rio'},
+      {c:'rio', ll:[-22.9515,-43.1830], t:'Recogida del coche · Botafogo', i:'Casa e Gourmet · R. Gen. Severiano 97', q:'Casa e Gourmet Rua General Severiano 97 Botafogo Rio de Janeiro'},
+      // Angra dos Reis
+      {c:'angra', ll:[-23.0060,-44.3180], t:'Vivienda Angra dos Reis', i:'Rua Dibiase 410 · 7–10 sep', q:'Rua Dibiase 410 Angra dos Reis 23930-700'},
+      {c:'angra', ll:[-23.0069,-44.3181], t:'Casco Histórico de Angra', i:'Iglesias coloniales y puerto', q:'Centro Histórico Angra dos Reis'},
+      {c:'angra', ll:[-23.1430,-44.1730], t:'Ilha Grande', i:'Buceo, paddlesurf y playas de postal', q:'Ilha Grande Angra dos Reis'},
+      // Paraty
+      {c:'paraty', ll:[-23.2135,-44.7180], t:'Alojamiento Paraty', i:'Av. Octávio Gama 184 · 10–11 sep', q:'Avenida Octávio Gama 184 Paraty 23970-000'},
+      {c:'paraty', ll:[-23.2196,-44.7130], t:'Centro Histórico de Paraty', i:'Calles empedradas · Patrimonio de la Humanidad', q:'Centro Histórico de Paraty'},
+      {c:'paraty', ll:[-23.2560,-44.7830], t:'Cachoeira do Tobogã', i:'Tobogán natural de roca', q:'Cachoeira do Tobogã Paraty'},
+      {c:'paraty', ll:[-23.2170,-44.7140], t:'Tour en barco · bahía de Paraty', i:'Goleta por islas y playa escondida', q:'Cais de Paraty passeio de barco'},
+      // Vuelos / aeropuertos
+      {c:'fly', ll:[-23.4356,-46.4731], t:'Aeropuerto GRU (São Paulo)', i:'Llegada 27 ago · vuelta 12 sep 19:20', q:'Aeroporto de Guarulhos GRU'},
+      {c:'fly', ll:[-25.6003,-54.4850], t:'Aeropuerto Foz do Iguaçu (IGU)', i:'Vuelos 31 ago y 3 sep', q:'Aeroporto Foz do Iguaçu IGU'},
+      {c:'fly', ll:[-22.8100,-43.2506], t:'Aeropuerto Galeão Río (GIG)', i:'Llegada 3 sep', q:'Aeroporto Internacional do Galeão GIG'}
+    ];
+    var map=L.map('map',{scrollWheelZoom:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);
+    var group=[];
+    PTS.forEach(function(p){
+      var col=C[p.c]||'#009739';
+      var icon=L.divIcon({className:'',iconSize:[18,18],iconAnchor:[9,9],
+        html:'<div style="width:16px;height:16px;border-radius:50%;background:'+col+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>'});
+      var m=L.marker(p.ll,{icon:icon,title:p.t}).addTo(map);
+      m.bindPopup('<b>'+p.t+'</b><span class="pop-info">'+p.i+'</span><a href="'+g(p.q)+'" target="_blank" rel="noopener">📍 Abrir en Google Maps ↗</a>');
+      group.push(m);
+    });
+    map.fitBounds(L.featureGroup(group).getBounds().pad(0.12));
   })();
 </script>
 </body>
