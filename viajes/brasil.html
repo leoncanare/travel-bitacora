@@ -122,7 +122,12 @@
   .leaflet-popup-content a{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--green-d);text-decoration:none}
 
   /* ---------- TABS ---------- */
-  .tabs{position:sticky;top:52px;z-index:40;display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin-bottom:8px;background:var(--paper);-webkit-overflow-scrolling:touch}
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin-bottom:8px;background:var(--paper);-webkit-overflow-scrolling:touch}
+  .tabs.sticky{position:sticky;top:52px;z-index:40}
+  .wxbig{display:flex;align-items:center;gap:16px;margin-bottom:10px}
+  .wxbig .ic{font-size:46px;line-height:1;flex:none}
+  .wxbig .t{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;color:var(--ink)}
+  .wxbig .s{font-size:13.5px;color:var(--muted)}
   .tabs::-webkit-scrollbar{display:none}
   .tab{flex:none;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:var(--green-d);background:#fff;border:1px solid var(--line);padding:8px 13px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
   .tab:hover{background:#e6f6ec;border-color:var(--green)}
@@ -210,6 +215,7 @@
       <a href="#cambio">Cambio</a>
       <a href="#tiempo">Tiempo</a>
       <a href="#comer">Comer</a>
+      <a href="#esenciales">Esenciales</a>
       <a href="#consejos">Consejos</a>
       <a href="#portugues">Portugués</a>
     </div>
@@ -254,7 +260,8 @@
   <section class="sec" id="plan">
     <div class="sec-h"><span class="dot"></span>La ruta, etapa a etapa</div>
 
-    <div class="tabs" role="tablist" aria-label="Etapas del viaje">
+    <div class="tabgroup">
+    <div class="tabs sticky" role="tablist" aria-label="Etapas del viaje">
       <button class="tab active" role="tab" data-tab="sp1">🇧🇷 São Paulo<small>27–31 ago</small></button>
       <button class="tab" role="tab" data-tab="foz">💦 Foz do Iguaçu<small>31 ago–3 sep</small></button>
       <button class="tab" role="tab" data-tab="rio">⛰️ Río de Janeiro<small>3–7 sep</small></button>
@@ -392,6 +399,7 @@
         </div>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- CAMBIO DE MONEDA -->
@@ -423,29 +431,149 @@
 
   <!-- TIEMPO -->
   <section class="sec" id="tiempo">
-    <div class="sec-h"><span class="dot"></span>El tiempo por etapas</div>
-    <div class="card reveal">
-      <div class="wx">
-        <div class="wx-day"><div class="d">SÃO PAULO</div><div class="ic">🌦️</div><div class="t">22°</div><div class="r">🌧️ 45%</div></div>
-        <div class="wx-day"><div class="d">FOZ</div><div class="ic">🌤️</div><div class="t">24°</div><div class="r">🌧️ 40%</div></div>
-        <div class="wx-day"><div class="d">RÍO</div><div class="ic">☀️</div><div class="t">27°</div><div class="r">🌧️ 20%</div></div>
-        <div class="wx-day"><div class="d">ANGRA</div><div class="ic">⛅</div><div class="t">26°</div><div class="r">🌧️ 30%</div></div>
-        <div class="wx-day"><div class="d">PARATY</div><div class="ic">🌦️</div><div class="t">25°</div><div class="r">🌧️ 40%</div></div>
+    <div class="sec-h"><span class="dot"></span>El tiempo por ubicación</div>
+    <div class="tabgroup reveal">
+      <div class="tabs" role="tablist" aria-label="Tiempo por ubicación">
+        <button class="tab active" role="tab" data-tab="wx-sp">🇧🇷 São Paulo</button>
+        <button class="tab" role="tab" data-tab="wx-foz">💦 Foz do Iguaçu</button>
+        <button class="tab" role="tab" data-tab="wx-rio">⛰️ Río de Janeiro</button>
+        <button class="tab" role="tab" data-tab="wx-costa">⛵ Costa Verde</button>
       </div>
-      <p class="wx-note">Máximas típicas de finales de agosto–septiembre (fin del invierno / inicio de la primavera austral). En São Paulo y Foz puede refrescar de noche: lleva una <b>chaqueta fina</b>. En Río y la Costa Verde hace más calor. Protección solar siempre y algo para la <b>lluvia ligera</b>.</p>
+      <div class="tabpanel active" id="tab-wx-sp" role="tabpanel">
+        <div class="card">
+          <div class="wxbig"><span class="ic">🌦️</span><div><div class="t">22° / 12°</div><div class="s">Fin del invierno · cielos variables · lluvia ocasional</div></div></div>
+          <p class="wx-note">Fresco de noche y de madrugada (12–14°). Lleva <b>chaqueta o abrigo ligero</b>, sobre todo para la boda de noche. Puede caer algún chubasco: un paraguas plegable no sobra.</p>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-wx-foz" role="tabpanel">
+        <div class="card">
+          <div class="wxbig"><span class="ic">🌤️</span><div><div class="t">26° / 15°</div><div class="s">Subtropical · húmedo y más cálido</div></div></div>
+          <p class="wx-note">Tiempo agradable de día, con humedad. En las cataratas te vas a mojar igual: <b>chubasquero</b> y funda para el móvil. Puede llover en cualquier momento; los chubascos pasan rápido.</p>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-wx-rio" role="tabpanel">
+        <div class="card">
+          <div class="wxbig"><span class="ic">☀️</span><div><div class="t">28° / 20°</div><div class="s">Soleado y seco · la mejor época del viaje</div></div></div>
+          <p class="wx-note">Sol y calorcito, ideal para playa. <b>Protección solar obligatoria</b> aunque esté nublado, y bebe mucha agua. Alguna tarde puede entrar bruma o un chubasco corto.</p>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-wx-costa" role="tabpanel">
+        <div class="card">
+          <div class="wxbig"><span class="ic">⛅</span><div><div class="t">27° / 19°</div><div class="s">Cálido y húmedo · mar templado (Angra &amp; Paraty)</div></div></div>
+          <p class="wx-note">Calor con humedad y algún chubasco tropical que se va rápido. El mar está agradable para bañarse. <b>Protección solar resistente al agua</b> y repelente para la selva atlántica.</p>
+        </div>
+      </div>
     </div>
+    <p class="wx-note">Máximas/mínimas típicas de finales de agosto–septiembre (fin del invierno / inicio de la primavera austral). Son orientativas: consulta la previsión concreta unos días antes de cada etapa.</p>
   </section>
 
   <!-- COMER -->
   <section class="sec" id="comer">
-    <div class="sec-h"><span class="dot"></span>Comer rico y barato</div>
-    <div class="card reveal">
-      <div class="row"><span>Comida por kilo <small>Buffet al peso · en toda ciudad, sano y económico</small></span><b>40-60 R$<small>~6-10 €</small></b></div>
-      <div class="row"><span>Feijoada <small>El plato nacional · tradición de sábado/miércoles</small></span><b>50-80 R$<small>~8-13 €</small></b></div>
-      <div class="row"><span>Pão de queijo + café <small>Desayuno típico · en cualquier padaria</small></span><b>10-18 R$<small>~2-3 €</small></b></div>
-      <div class="row"><span>Churrasco / rodízio <small>Carne a discreción · hambre de verdad</small></span><b>90-160 R$<small>~15-26 €</small></b></div>
-      <div class="row"><span>Caipirinha <small>La de siempre · o de frutas</small></span><b>18-30 R$<small>~3-5 €</small></b></div>
-      <div class="row"><span>El truco local <small>El <i>prato feito</i> (PF) del mediodía llena por poco dinero; los buffets al peso son tu mejor amigo</small></span><b>R$</b></div>
+    <div class="sec-h"><span class="dot"></span>Comer rico y barato por ubicación</div>
+    <div class="tabgroup reveal">
+      <div class="tabs" role="tablist" aria-label="Comer por ubicación">
+        <button class="tab active" role="tab" data-tab="food-sp">🇧🇷 São Paulo</button>
+        <button class="tab" role="tab" data-tab="food-foz">💦 Foz do Iguaçu</button>
+        <button class="tab" role="tab" data-tab="food-rio">⛰️ Río de Janeiro</button>
+        <button class="tab" role="tab" data-tab="food-costa">⛵ Costa Verde</button>
+      </div>
+      <div class="tabpanel active" id="tab-food-sp" role="tabpanel">
+        <div class="card">
+          <div class="row"><span>Mercadão <small>Sanduíche de mortadela + pastel de bacalhau</small></span><b>25-45 R$<small>~4-7 €</small></b></div>
+          <div class="row"><span>Pizza paulistana <small>SP es la capital brasileña de la pizza</small></span><b>50-90 R$<small>~8-15 €</small></b></div>
+          <div class="row"><span>Esfiha y comida árabe <small>Herencia libanesa · barato y rico</small></span><b>6-15 R$<small>~1-2 €</small></b></div>
+          <div class="row"><span>Liberdade <small>Ramen, yakisoba y gyoza en el barrio japonés</small></span><b>35-60 R$<small>~6-10 €</small></b></div>
+          <div class="row"><span>Comida por kilo <small>Buffet al peso · mediodía sano y económico</small></span><b>40-60 R$<small>~6-10 €</small></b></div>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-food-foz" role="tabpanel">
+        <div class="card">
+          <div class="row"><span>Rodízio de carnes <small>Buffet libre · para reponer del día de cataratas</small></span><b>60-100 R$<small>~10-16 €</small></b></div>
+          <div class="row"><span>Peixe de río <small>Surubí o dorado · cocina paranaense</small></span><b>50-90 R$<small>~8-15 €</small></b></div>
+          <div class="row"><span>Marco das Três Fronteiras <small>Caipirinha al atardecer, vistas a 3 países</small></span><b>25-40 R$<small>~4-6 €</small></b></div>
+          <div class="row"><span>Açaí / sorvete <small>Para el calor húmedo</small></span><b>15-30 R$<small>~2-5 €</small></b></div>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-food-rio" role="tabpanel">
+        <div class="card">
+          <div class="row"><span>Boteco <small>Petiscos + chopp bien frío · el plan carioca</small></span><b>40-80 R$<small>~6-13 €</small></b></div>
+          <div class="row"><span>Feijoada <small>Los sábados · el plato nacional</small></span><b>50-80 R$<small>~8-13 €</small></b></div>
+          <div class="row"><span>Açaí na tigela + sucos <small>Energía tropical · en cualquier esquina</small></span><b>15-35 R$<small>~2-6 €</small></b></div>
+          <div class="row"><span>Biscoito Globo + mate <small>El clásico de la playa de Copacabana</small></span><b>5-12 R$<small>~1-2 €</small></b></div>
+          <div class="row"><span>Churrascaria <small>Carne a discreción para un capricho</small></span><b>90-160 R$<small>~15-26 €</small></b></div>
+        </div>
+      </div>
+      <div class="tabpanel" id="tab-food-costa" role="tabpanel">
+        <div class="card">
+          <div class="row"><span>Frutos do mar <small>Camarão, lula y ostras fresquísimos</small></span><b>60-120 R$<small>~10-19 €</small></b></div>
+          <div class="row"><span>Moqueca <small>Guiso de pescado con leche de coco · para 2</small></span><b>90-150 R$<small>~15-24 €</small></b></div>
+          <div class="row"><span>Peixe grelhado <small>Pescado a la brasa frente al mar</small></span><b>50-90 R$<small>~8-15 €</small></b></div>
+          <div class="row"><span>Caipirinha de frutas <small>De maracujá, morango o limão</small></span><b>20-35 R$<small>~3-6 €</small></b></div>
+        </div>
+      </div>
+    </div>
+    <p class="wx-note">Truco en cualquier ubicación: el <i>prato feito</i> (PF) del mediodía y los buffets <b>por kilo</b> llenan por poco dinero. Prioriza comer fuerte a mediodía.</p>
+  </section>
+
+  <!-- ESENCIALES -->
+  <section class="sec" id="esenciales">
+    <div class="sec-h"><span class="dot"></span>Esenciales por ubicación</div>
+    <div class="tabgroup reveal">
+      <div class="tabs" role="tablist" aria-label="Esenciales por ubicación">
+        <button class="tab active" role="tab" data-tab="ess-gen">🎒 General</button>
+        <button class="tab" role="tab" data-tab="ess-sp">🇧🇷 São Paulo</button>
+        <button class="tab" role="tab" data-tab="ess-foz">💦 Foz do Iguaçu</button>
+        <button class="tab" role="tab" data-tab="ess-rio">⛰️ Río</button>
+        <button class="tab" role="tab" data-tab="ess-costa">⛵ Costa Verde</button>
+      </div>
+      <div class="tabpanel active" id="tab-ess-gen" role="tabpanel">
+        <div class="card"><ul class="tips">
+          <li><b>Pasaporte en vigor</b> + copias (en papel y foto en el móvil).</li>
+          <li><b>Adaptador de enchufe tipo N</b> y comprobar el voltaje (127 V / 220 V según ciudad).</li>
+          <li><b>Tarjeta que funcione fuera</b> + algo de efectivo. Instala <b>Pix</b> si puedes.</li>
+          <li><b>Seguro de viaje</b> y móvil con eSIM o roaming activado.</li>
+          <li>Consulta la <b>vacuna de la fiebre amarilla</b> (recomendada para zonas de selva).</li>
+          <li>Apps: <b>Uber / 99</b>, Google Maps, WhatsApp y iFood instaladas.</li>
+        </ul></div>
+      </div>
+      <div class="tabpanel" id="tab-ess-sp" role="tabpanel">
+        <div class="card"><ul class="tips">
+          <li><b>Ropa elegante para la boda</b> (30 ago) + calzado cómodo aparte.</li>
+          <li><b>Abrigo ligero</b>: refresca bastante de noche (baja a 12–14°).</li>
+          <li><b>Paraguas plegable</b> por si cae algún chubasco.</li>
+          <li>Cuenta con <b>tráfico</b> en los traslados: sal siempre con margen.</li>
+          <li>Zona de la boda (Sítio Barrocada) está <b>al norte</b>: organiza el transporte de ida y vuelta.</li>
+        </ul></div>
+      </div>
+      <div class="tabpanel" id="tab-ess-foz" role="tabpanel">
+        <div class="card"><ul class="tips">
+          <li><b>Pasaporte</b> imprescindible para cruzar al <b>lado argentino</b>.</li>
+          <li><b>Chubasquero/impermeable</b> y calzado que se pueda mojar.</li>
+          <li><b>Funda o bolsa estanca</b> para el móvil (cataratas y rafting).</li>
+          <li><b>Muda de ropa seca</b> para después del rafting.</li>
+          <li><b>Repelente</b> de mosquitos y protección solar.</li>
+        </ul></div>
+      </div>
+      <div class="tabpanel" id="tab-ess-rio" role="tabpanel">
+        <div class="card"><ul class="tips">
+          <li><b>Bañador, chanclas y toalla fina</b> de playa.</li>
+          <li><b>Protección solar alta</b> y gorra; bebe mucha agua.</li>
+          <li>A la playa, <b>lo mínimo y nada de valor</b>; riñonera discreta.</li>
+          <li><b>Efectivo suelto</b> para los quioscos de playa.</li>
+          <li><b>Zapatillas cómodas</b> para el Cristo y el Pan de Azúcar.</li>
+          <li>En favelas y de noche, <b>siempre con guía / en Uber</b>.</li>
+        </ul></div>
+      </div>
+      <div class="tabpanel" id="tab-ess-costa" role="tabpanel">
+        <div class="card"><ul class="tips">
+          <li><b>Bañador y gafas de snorkel</b> propias.</li>
+          <li><b>Escarpines</b> para rocas y muelles.</li>
+          <li><b>Protección solar resistente al agua</b> y repelente.</li>
+          <li><b>Efectivo</b>: en las islas puede no haber datáfono.</li>
+          <li><b>Pastillas para el mareo</b> si haces travesías en barco.</li>
+          <li>Bolsa seca para llevar lo justo en las excursiones de mar.</li>
+        </ul></div>
+      </div>
     </div>
   </section>
 
@@ -467,19 +595,39 @@
 
   <!-- PALABRAS -->
   <section class="sec" id="portugues">
-    <div class="sec-h"><span class="dot"></span>Diez palabras en portugués</div>
+    <div class="sec-h"><span class="dot"></span>Vocabulario en portugués</div>
     <div class="card reveal">
+      <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px;margin-bottom:10px;color:var(--green-d)">Básico</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px">
         <div class="row"><span><b>Oi / Olá</b></span><b style="color:var(--green-d)">hola</b></div>
+        <div class="row"><span><b>Bom dia</b></span><b style="color:var(--green-d)">buenos días</b></div>
+        <div class="row"><span><b>Boa tarde</b></span><b style="color:var(--green-d)">buenas tardes</b></div>
+        <div class="row"><span><b>Boa noite</b></span><b style="color:var(--green-d)">buenas noches</b></div>
         <div class="row"><span><b>Tchau</b></span><b style="color:var(--green-d)">adiós</b></div>
+        <div class="row"><span><b>Sim / Não</b></span><b style="color:var(--green-d)">sí / no</b></div>
         <div class="row"><span><b>Obrigado/a</b></span><b style="color:var(--green-d)">gracias</b></div>
+        <div class="row"><span><b>Valeu</b></span><b style="color:var(--green-d)">gracias (coloq.)</b></div>
+        <div class="row"><span><b>De nada</b></span><b style="color:var(--green-d)">de nada</b></div>
         <div class="row"><span><b>Por favor</b></span><b style="color:var(--green-d)">por favor</b></div>
-        <div class="row"><span><b>Saúde</b></span><b style="color:var(--green-d)">¡salud!</b></div>
-        <div class="row"><span><b>Com licença</b></span><b style="color:var(--green-d)">perdón</b></div>
+        <div class="row"><span><b>Desculpa</b></span><b style="color:var(--green-d)">perdona</b></div>
+        <div class="row"><span><b>Com licença</b></span><b style="color:var(--green-d)">permiso / perdón</b></div>
+      </div>
+      <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px;margin:18px 0 10px;color:var(--green-d)">Útiles del día a día</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px">
         <div class="row"><span><b>Quanto custa?</b></span><b style="color:var(--green-d)">¿cuánto es?</b></div>
+        <div class="row"><span><b>A conta, por favor</b></span><b style="color:var(--green-d)">la cuenta</b></div>
+        <div class="row"><span><b>Onde fica…?</b></span><b style="color:var(--green-d)">¿dónde está…?</b></div>
+        <div class="row"><span><b>Você tem…?</b></span><b style="color:var(--green-d)">¿tienes…?</b></div>
+        <div class="row"><span><b>Água</b></span><b style="color:var(--green-d)">agua</b></div>
+        <div class="row"><span><b>Banheiro</b></span><b style="color:var(--green-d)">aseo / baño</b></div>
+        <div class="row"><span><b>Ônibus</b></span><b style="color:var(--green-d)">autobús</b></div>
         <div class="row"><span><b>Praia</b></span><b style="color:var(--green-d)">playa</b></div>
         <div class="row"><span><b>Cerveja</b></span><b style="color:var(--green-d)">cerveza</b></div>
-        <div class="row"><span><b>Bom dia</b></span><b style="color:var(--green-d)">buenos días</b></div>
+        <div class="row"><span><b>Gostoso</b></span><b style="color:var(--green-d)">rico (sabroso)</b></div>
+        <div class="row"><span><b>Legal / Massa</b></span><b style="color:var(--green-d)">guay / genial</b></div>
+        <div class="row"><span><b>Beleza?</b></span><b style="color:var(--green-d)">¿todo bien?</b></div>
+        <div class="row"><span><b>Bora!</b></span><b style="color:var(--green-d)">¡vamos!</b></div>
+        <div class="row"><span><b>Saúde</b></span><b style="color:var(--green-d)">¡salud!</b></div>
       </div>
     </div>
   </section>
@@ -513,17 +661,19 @@
     rate.addEventListener('input',function(){var v=parseFloat(eur.value);if(isFinite(v)){brl.value=round(v*r());}else{var s=parseFloat(brl.value);if(isFinite(s))eur.value=round(s/r());}});
   })();
 
-  /* ===== tabs ===== */
+  /* ===== tabs (scoped por grupo) ===== */
   (function(){
-    var tabs=[].slice.call(document.querySelectorAll('.tab'));
-    var panels=[].slice.call(document.querySelectorAll('.tabpanel'));
-    tabs.forEach(function(t){
-      t.addEventListener('click',function(){
-        tabs.forEach(function(x){x.classList.remove('active');});
-        panels.forEach(function(p){p.classList.remove('active');});
-        t.classList.add('active');
-        var p=document.getElementById('tab-'+t.getAttribute('data-tab'));
-        if(p)p.classList.add('active');
+    document.querySelectorAll('.tabgroup').forEach(function(grp){
+      var tabs=[].slice.call(grp.querySelectorAll('.tab'));
+      var panels=[].slice.call(grp.querySelectorAll('.tabpanel'));
+      tabs.forEach(function(t){
+        t.addEventListener('click',function(){
+          tabs.forEach(function(x){x.classList.remove('active');});
+          panels.forEach(function(p){p.classList.remove('active');});
+          t.classList.add('active');
+          var p=grp.querySelector('#tab-'+t.getAttribute('data-tab'));
+          if(p)p.classList.add('active');
+        });
       });
     });
   })();
