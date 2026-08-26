@@ -159,6 +159,8 @@
   .stop.done .stop-tools .chk{background:var(--green);border-color:var(--green);color:#fff}
   .stop.done h4{text-decoration:line-through;opacity:.6}
   .stop.done p{opacity:.55}
+  .stop.fixed.has-lock{padding-right:56px}
+  .stop-lock{position:absolute;right:0;top:2px;display:inline-flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;color:var(--muted);opacity:.8;white-space:nowrap}
 
   /* alojamiento */
   .stay{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--green);border-radius:12px;padding:15px 17px;margin-bottom:22px}
@@ -388,7 +390,7 @@
             <div class="track">
               <div class="stop free"><h4>Free Tour por el centro<span class="free-tag">gratis</span></h4><p>La mejor forma de ubicarse: centro histórico, Catedral da Sé, Pátio do Colégio y el Theatro Municipal. Deja propina al guía.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Praça+da+Sé+São+Paulo">📍 Punto de inicio ↗</a></div>
               <div class="stop"><h4>Mirador Farol Santander<span class="price">~R$25 · ~4€</span></h4><p>La torre-mirador (antigua Torre Santander) con vistas 360° de la megaciudad desde el piso 26. Ideal al atardecer.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Farol+Santander+São+Paulo">📍 Ubicación ↗</a></div>
-              <div class="stop star"><div class="time">18:00</div><h4>🎉 Despedida de solteros · Vila Madalena</h4><p>Noche de despedida en Rua Harmonia 77 (Vila Madalena, el barrio bohemio de bares). Organiza los traslados de vuelta (Uber/99).</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Harmonia+77+Vila+Madalena+São+Paulo+05435-000">📍 Ubicación ↗</a></div>
+              <div class="stop star fixed"><div class="time">18:00</div><h4>🎉 Despedida de solteros · Vila Madalena</h4><p>Noche de despedida en Rua Harmonia 77 (Vila Madalena, el barrio bohemio de bares). Organiza los traslados de vuelta (Uber/99).</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Harmonia+77+Vila+Madalena+São+Paulo+05435-000">📍 Ubicación ↗</a></div>
             </div>
           </div>
           <div class="day-box" data-day="SÁB 29 AGO">
@@ -402,13 +404,13 @@
           <div class="day-box" data-day="DOM 30 AGO">
             <div class="day-box-head"><span class="dtag">DOM 30 AGO</span></div>
             <div class="track">
-              <div class="stop star"><h4>💒 Boda · Sítio Barrocada</h4><p>El gran día. Celebración en Av. Cel. Sezefredo Fagundes 6123 (Sítio Barrocada, al norte de la ciudad). Todo el día reservado.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Av.+Cel.+Sezefredo+Fagundes+6123+Sítio+Barrocada+São+Paulo">📍 Ubicación ↗</a></div>
+              <div class="stop star fixed"><h4>💒 Boda · Sítio Barrocada</h4><p>El gran día. Celebración en Av. Cel. Sezefredo Fagundes 6123 (Sítio Barrocada, al norte de la ciudad). Todo el día reservado.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Av.+Cel.+Sezefredo+Fagundes+6123+Sítio+Barrocada+São+Paulo">📍 Ubicación ↗</a></div>
             </div>
           </div>
           <div class="day-box" data-day="LUN 31 AGO">
             <div class="day-box-head"><span class="dtag">LUN 31 AGO</span></div>
             <div class="track">
-              <div class="stop"><div class="time">11:00 · vuelo 12:05</div><h4>Checkout y salida al aeropuerto ✈️</h4><p>Deja el Airbnb a las 11:00 y al aeropuerto: vuelo a Foz do Iguaçu a las 12:05. Ve con margen.</p></div>
+              <div class="stop fixed"><div class="time">11:00 · vuelo 12:05</div><h4>Checkout y salida al aeropuerto ✈️</h4><p>Deja el Airbnb a las 11:00 y al aeropuerto: vuelo a Foz do Iguaçu a las 12:05. Ve con margen.</p></div>
             </div>
           </div>
         </div>
@@ -429,7 +431,7 @@
           <div class="day-box" data-day="LUN 31 AGO">
             <div class="day-box-head"><span class="dtag">LUN 31 AGO</span></div>
             <div class="track">
-              <div class="stop"><div class="time">Vuelo 12:05 → 13:55</div><h4>Vuelo São Paulo → Foz do Iguaçu</h4><p>Llegada y traslado al hotel (~20:00 instalados). Tarde tranquila; muchos hoteles tienen piscina para el calor.</p></div>
+              <div class="stop fixed"><div class="time">Vuelo 12:05 → 13:55</div><h4>Vuelo São Paulo → Foz do Iguaçu</h4><p>Llegada y traslado al hotel (~20:00 instalados). Tarde tranquila; muchos hoteles tienen piscina para el calor.</p></div>
             </div>
           </div>
           <div class="day-box" data-day="MAR 1 SEP">
@@ -448,7 +450,7 @@
           <div class="day-box" data-day="JUE 3 SEP">
             <div class="day-box-head"><span class="dtag">JUE 3 SEP</span></div>
             <div class="track">
-              <div class="stop"><div class="time">Vuelo 10:15 → 12:15</div><h4>Checkout y vuelo a Río 🛫</h4><p>Salida temprana. Vuelo Foz do Iguaçu → Río de Janeiro (GIG), llegada 12:15.</p></div>
+              <div class="stop fixed"><div class="time">Vuelo 10:15 → 12:15</div><h4>Checkout y vuelo a Río 🛫</h4><p>Salida temprana. Vuelo Foz do Iguaçu → Río de Janeiro (GIG), llegada 12:15.</p></div>
             </div>
           </div>
         </div>
@@ -499,7 +501,7 @@
           <div class="day-box" data-day="LUN 7 SEP">
             <div class="day-box-head"><span class="dtag">LUN 7 SEP</span></div>
             <div class="track">
-              <div class="stop"><div class="time">11:30</div><h4>Recogida del coche 🚗</h4><p>En Casa e Gourmet (Shopping), R. Gen. Severiano 97, Botafogo. A partir de aquí, ruta por la Costa Verde.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Casa+e+Gourmet+Rua+General+Severiano+97+Botafogo+Rio+de+Janeiro">📍 Ubicación ↗</a></div>
+              <div class="stop fixed"><div class="time">11:30</div><h4>Recogida del coche 🚗</h4><p>En Casa e Gourmet (Shopping), R. Gen. Severiano 97, Botafogo. A partir de aquí, ruta por la Costa Verde.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Casa+e+Gourmet+Rua+General+Severiano+97+Botafogo+Rio+de+Janeiro">📍 Ubicación ↗</a></div>
             </div>
           </div>
         </div>
@@ -570,15 +572,15 @@
           <div class="day-box" data-day="VIE 11 SEP">
             <div class="day-box-head"><span class="dtag">VIE 11 SEP</span></div>
             <div class="track">
-              <div class="stop star"><div class="time">Noche</div><h4>Cena con la familia García Grecco</h4><p>Llegada desde la Costa Verde justo para cenar con la familia.</p></div>
+              <div class="stop star fixed"><div class="time">Noche</div><h4>Cena con la familia García Grecco</h4><p>Llegada desde la Costa Verde justo para cenar con la familia.</p></div>
             </div>
           </div>
           <div class="day-box" data-day="SÁB 12 SEP">
             <div class="day-box-head"><span class="dtag">SÁB 12 SEP</span></div>
             <div class="track">
-              <div class="stop"><div class="time">Mañana</div><h4>Almuerzo con la familia García Grecco</h4><p>Última comida juntos antes de ir al aeropuerto.</p></div>
-              <div class="stop"><h4>Devolver el coche 🚗</h4><p>Entrega del coche de alquiler con margen antes del vuelo.</p></div>
-              <div class="stop"><div class="time">Vuelo 19:20</div><h4>Vuelo de vuelta desde GRU 🛫</h4><p>Aeropuerto de Guarulhos (GRU). Sal con tiempo: es grande y suele haber colas en facturación y control.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Aeroporto+de+Guarulhos+GRU">📍 Aeropuerto GRU ↗</a></div>
+              <div class="stop fixed"><div class="time">Mañana</div><h4>Almuerzo con la familia García Grecco</h4><p>Última comida juntos antes de ir al aeropuerto.</p></div>
+              <div class="stop fixed"><h4>Devolver el coche 🚗</h4><p>Entrega del coche de alquiler con margen antes del vuelo.</p></div>
+              <div class="stop fixed"><div class="time">Vuelo 19:20</div><h4>Vuelo de vuelta desde GRU 🛫</h4><p>Aeropuerto de Guarulhos (GRU). Sal con tiempo: es grande y suele haber colas en facturación y control.</p><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Aeroporto+de+Guarulhos+GRU">📍 Aeropuerto GRU ↗</a></div>
             </div>
           </div>
         </div>
@@ -890,8 +892,9 @@
     function save(){try{localStorage.setItem(NS,JSON.stringify({checked:store.checked,boxes:store.boxes}));}catch(e){}}
     function esc(k){return (window.CSS&&CSS.escape)?CSS.escape(k):k.replace(/[^a-zA-Z0-9_-]/g,'\\$&');}
     function slug(t){return t.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48);}
-    function prevStop(s){var p=s.previousElementSibling;while(p&&!p.classList.contains('stop'))p=p.previousElementSibling;return p;}
-    function nextStop(s){var n=s.nextElementSibling;while(n&&!n.classList.contains('stop'))n=n.nextElementSibling;return n;}
+    function rawPrev(s){var p=s.previousElementSibling;while(p&&!p.classList.contains('stop'))p=p.previousElementSibling;return p;}
+    function rawNext(s){var n=s.nextElementSibling;while(n&&!n.classList.contains('stop'))n=n.nextElementSibling;return n;}
+    function firstMovable(track){var c=track.firstElementChild;while(c&&(!c.classList.contains('stop')||c.classList.contains('fixed')))c=c.nextElementSibling;return c;}
     function adjBox(b,dir){var x=dir<0?b.previousElementSibling:b.nextElementSibling;while(x&&!x.classList.contains('day-box'))x=dir<0?x.previousElementSibling:x.nextElementSibling;return x;}
     function saveLayout(panel,tid){var m={};[].slice.call(panel.querySelectorAll('.day-box')).forEach(function(box){m[box.getAttribute('data-box')]=[].slice.call(box.querySelectorAll('.stop')).map(function(s){return s.getAttribute('data-k');});});store.boxes[tid]=m;save();}
     document.querySelectorAll('.tabgroup .tabpanel').forEach(function(panel){
@@ -900,7 +903,15 @@
       [].slice.call(panel.querySelectorAll('.day-box')).forEach(function(box){box.setAttribute('data-box',tid+'#'+slug(box.getAttribute('data-day')));});
       [].slice.call(panel.querySelectorAll('.stop')).forEach(function(s){
         var h=s.querySelector('h4');var k=tid+'::'+slug(h?h.textContent:s.textContent);
-        s.setAttribute('data-k',k);s.classList.add('has-tools');
+        s.setAttribute('data-k',k);
+        if(s.classList.contains('fixed')){ /* evento/vuelo fijo: sin check ni reordenar */
+          if(store.checked[k]){delete store.checked[k];}
+          s.classList.add('has-lock');
+          var lk=document.createElement('span');lk.className='stop-lock';lk.textContent='🔒 fijo';
+          s.insertBefore(lk,s.firstChild);
+          return;
+        }
+        s.classList.add('has-tools');
         var tools=document.createElement('div');tools.className='stop-tools';
         var chk=document.createElement('button');chk.type='button';chk.className='chk';chk.title='Marcar como visto';chk.setAttribute('aria-label','Marcar como visto');chk.textContent='✓';
         var up=document.createElement('button');up.type='button';up.title='Subir (o pasar al día anterior)';up.setAttribute('aria-label','Subir');up.textContent='▲';
@@ -916,9 +927,15 @@
       if(saved){Object.keys(saved).forEach(function(bid){var box=panel.querySelector('.day-box[data-box="'+esc(bid)+'"]');if(!box)return;var tr=box.querySelector('.track');saved[bid].forEach(function(k){var el=panel.querySelector('.stop[data-k="'+esc(k)+'"]');if(el&&tr)tr.appendChild(el);});});}
     });
     function move(s,dir,panel,tid){
-      var track=s.parentNode;var sib=dir<0?prevStop(s):nextStop(s);
-      if(sib){if(dir<0)track.insertBefore(s,sib);else track.insertBefore(sib,s);}
-      else{var box=s.closest('.day-box');var tb=adjBox(box,dir);if(tb){var tt=tb.querySelector('.track');if(dir<0)tt.appendChild(s);else tt.insertBefore(s,tt.firstChild);}}
+      var track=s.parentNode;var sib=dir<0?rawPrev(s):rawNext(s);
+      if(sib){
+        if(sib.classList.contains('fixed'))return; /* no cruzar una parada fija */
+        if(dir<0)track.insertBefore(s,sib);else track.insertBefore(sib,s);
+      }else{
+        var tb=adjBox(s.closest('.day-box'),dir);if(!tb)return;var tt=tb.querySelector('.track');
+        if(dir<0){tt.appendChild(s);}
+        else{var ref=firstMovable(tt);if(ref)tt.insertBefore(s,ref);else tt.appendChild(s);}
+      }
       saveLayout(panel,tid);
     }
   })();
