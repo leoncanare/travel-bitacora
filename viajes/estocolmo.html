@@ -100,6 +100,11 @@
   .row .golink{display:inline-block;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--blue-d);text-decoration:none}
   .row .golink:hover{text-decoration:underline}
 
+  .vocab-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;min-width:0}
+  .vocab-grid .row{min-width:0}
+  .vocab-grid .row span{min-width:0;overflow-wrap:break-word}
+  @media(max-width:560px){.vocab-grid{grid-template-columns:1fr}}
+
   ul.tips{list-style:none}
   ul.tips li{position:relative;padding:8px 0 8px 24px;font-size:14px;border-bottom:1px dashed var(--line)}
   ul.tips li:last-child{border-bottom:0}
@@ -367,7 +372,7 @@
   <section class="sec" id="sueco">
     <div class="sec-h"><span class="dot"></span>Cuatro palabras suecas</div>
     <div class="card reveal">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px">
+      <div class="vocab-grid">
         <div class="row"><span><b>Hej</b></span><b style="color:var(--blue-d)">hola</b></div>
         <div class="row"><span><b>Hej då</b></span><b style="color:var(--blue-d)">adiós</b></div>
         <div class="row"><span><b>Tack</b></span><b style="color:var(--blue-d)">gracias</b></div>

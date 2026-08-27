@@ -110,6 +110,11 @@
   .row .golink{display:inline-block;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--green-d);text-decoration:none}
   .row .golink:hover{text-decoration:underline}
 
+  .vocab-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;min-width:0}
+  .vocab-grid .row{min-width:0}
+  .vocab-grid .row span{min-width:0;overflow-wrap:break-word}
+  @media(max-width:560px){.vocab-grid{grid-template-columns:1fr}}
+
   ul.tips{list-style:none}
   ul.tips li{position:relative;padding:8px 0 8px 24px;font-size:14px;border-bottom:1px dashed var(--line)}
   ul.tips li:last-child{border-bottom:0}
@@ -375,6 +380,7 @@
         <div class="st-links">
           <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Camberra+352+São+Paulo+03357-010">📍 Ubicación ↗</a>
           <a class="go book" target="_blank" rel="noopener" href="https://www.airbnb.es/rooms/888417364681663256">🛏️ Airbnb ↗</a>
+          <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Rua+Pedro+Malaquias+268+São+Paulo">🏠 Casa de Jaime (primo) ↗</a>
         </div>
       </div>
       <div class="day reveal">
@@ -735,7 +741,7 @@
     <div class="sec-h"><span class="dot"></span>Vocabulario en portugués</div>
     <div class="card reveal">
       <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px;margin-bottom:10px;color:var(--green-d)">Básico</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px">
+      <div class="vocab-grid">
         <div class="row"><span><b>Oi / Olá</b></span><b style="color:var(--green-d)">hola</b></div>
         <div class="row"><span><b>Bom dia</b></span><b style="color:var(--green-d)">buenos días</b></div>
         <div class="row"><span><b>Boa tarde</b></span><b style="color:var(--green-d)">buenas tardes</b></div>
@@ -750,7 +756,7 @@
         <div class="row"><span><b>Com licença</b></span><b style="color:var(--green-d)">permiso / perdón</b></div>
       </div>
       <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px;margin:18px 0 10px;color:var(--green-d)">Útiles del día a día</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px">
+      <div class="vocab-grid">
         <div class="row"><span><b>Quanto custa?</b></span><b style="color:var(--green-d)">¿cuánto es?</b></div>
         <div class="row"><span><b>A conta, por favor</b></span><b style="color:var(--green-d)">la cuenta</b></div>
         <div class="row"><span><b>Onde fica…?</b></span><b style="color:var(--green-d)">¿dónde está…?</b></div>
@@ -956,6 +962,7 @@
       {c:'sp', ll:[-23.5490,-46.6900], t:'Despedida de solteros', i:'Rua Harmonia 77 · Vila Madalena · 28 ago', q:'Rua Harmonia 77 Vila Madalena São Paulo 05435-000'},
       {c:'sp', ll:[-23.4350,-46.6030], t:'Boda 💒', i:'Av. Cel. Sezefredo Fagundes 6123 · Sítio Barrocada · 30 ago', q:'Av. Cel. Sezefredo Fagundes 6123 Sítio Barrocada São Paulo'},
       {c:'sp', ll:[-23.5560,-46.5450], t:'Alojamiento São Paulo (vuelta)', i:'Rua Eleonora Cintra 960 · 11–12 sep', q:'Rua Eleonora Cintra 960 São Paulo 03337-000'},
+      {c:'sp', ll:[-23.5580,-46.6400], t:'Casa de Jaime (primo)', i:'Rua Pedro Malaquias 268', q:'Rua Pedro Malaquias 268 São Paulo'},
       // Foz do Iguaçu
       {c:'foz', ll:[-25.5478,-54.5882], t:'Hotel Foz do Iguaçu', i:'Rua Marechal Deodoro 984 · Centro · 31 ago–3 sep', q:'Rua Marechal Deodoro 984 Foz do Iguaçu 85851-030'},
       {c:'foz', ll:[-25.6866,-54.4451], t:'Cataratas · lado Argentino', i:'Circuitos Inferior/Superior y Garganta del Diablo', q:'Garganta del Diablo Cataratas del Iguazú Argentina'},
